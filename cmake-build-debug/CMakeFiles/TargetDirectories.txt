@@ -1,0 +1,3 @@
+C:/Users/llt02/Desktop/AuTex/cmake-build-debug/CMakeFiles/AuTex.dir
+C:/Users/llt02/Desktop/AuTex/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/llt02/Desktop/AuTex/cmake-build-debug/CMakeFiles/rebuild_cache.dir
