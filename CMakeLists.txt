@@ -3,4 +3,4 @@ project(AuTex)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(AuTex main.cpp)
+add_executable(AuTex main.cpp include/lexer/lexer_defs.h include/lexer/lexer_utils.h lexer/lexer_utils.cpp)
