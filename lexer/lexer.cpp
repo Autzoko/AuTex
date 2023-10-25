@@ -2,14 +2,20 @@
 // Created by llt02 on 10/25/2023.
 //
 
-#include <utility>
 
 #include "../include/lexer/lexer.h"
 
 
-lexer::lexer(string file, string input) {
+lexer::lexer(string file, string target) {
     this->target_file = std::move(file);
-    this->input = std::move(input);
+    this->target_file = std::move(target);
+    cout << "read file" << endl;
+    read_file();
+    cout << "analyze" << endl;
+    debug_print_input();
+    analyze();
+    cout << "write tuples" << endl;
+    write_tuples();
 }
 
 void lexer::analyze() {
@@ -98,5 +104,34 @@ void lexer::analyze() {
 }
 
 void lexer::write_tuples() {
+    ofstream fw;
+    fw.open(target_file, ios::out);
+    for(auto & iter : tuples_)
+    {
+        if(iter.first == LX_LINE)
+        {
+            fw << endl;
+        }
+        else
+        {
+            fw << "(" << iter.first << ", " << iter.second << ") ";
+        }
+    }
+}
 
+void lexer::read_file() {
+    ifstream fr(source_file);
+    string _tmp((istreambuf_iterator<char>(fr)), istreambuf_iterator<char>());
+    input = _tmp;
+}
+
+void lexer::debug_print_tuples() {
+    for(auto & iter : tuples_)
+    {
+        cout << "(" << iter.first << ", " << iter.second << ")" << endl;
+    }
+}
+
+void lexer::debug_print_input() {
+    cout << input << endl;
 }

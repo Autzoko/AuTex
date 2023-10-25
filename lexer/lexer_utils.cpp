@@ -131,8 +131,3 @@ LX_TYPE lexer_is_double_comparator_(LX_TYPE first_char, char last_char)
     else
         return LX_DC_ERR;
 }
-
-void write_tuple_(std::ofstream fw, LX_TYPE type, char str[])
-{
-    fw << "(" << type << ", " << str << ")";
-}

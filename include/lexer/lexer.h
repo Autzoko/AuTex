@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <fstream>
+#include <streambuf>
+#include <iostream>
 using namespace std;
 
 
@@ -21,8 +24,12 @@ private:
 
     void analyze();
     void write_tuples();
+    void read_file();
+
+    void debug_print_tuples();
+    void debug_print_input();
 public:
-    lexer(string file, string input);
+    lexer(string file, string target);
 
 };
 
