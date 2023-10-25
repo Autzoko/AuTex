@@ -103,3 +103,36 @@ LX_TYPE lexer_is_double_operator_(LX_TYPE first_char, char last_char)
     else
         return LX_DO_ERR;
 }
+
+LX_TYPE lexer_is_single_comparator_(char c)
+{
+    switch(c)
+    {
+        case '<': return LX_SC_LT;
+        case '>': return LX_SC_GT;
+        default: return LX_SC_ERR;
+    }
+}
+
+LX_TYPE lexer_is_double_comparator_(LX_TYPE first_char, char last_char)
+{
+    if(last_char == ' ') return first_char;
+    else if(last_char == '=')
+    {
+        switch(first_char)
+        {
+            case LX_SC_LT: return LX_DC_LE;
+            case LX_SC_GT: return LX_DC_GE;
+            case LX_SO_ASSIGN: return LX_DC_EQU;
+            case LX_SO_NOT: return LX_DC_NOTEQU;
+            default: return LX_DC_ERR;
+        }
+    }
+    else
+        return LX_DC_ERR;
+}
+
+void write_tuple_(std::ofstream fw, LX_TYPE type, char str[])
+{
+    fw << "(" << type << ", " << str << ")";
+}
