@@ -37,7 +37,7 @@
 #define LX_SYM_SQM      312     // '
 #define LX_SYM_DQm      313     // "
 
-/*Single operator*/
+/*Single Operator*/
 #define LX_SO_ADD       401     // +
 #define LX_SO_SUB       402     // -
 #define LX_SO_MUL       403     // *
@@ -45,7 +45,24 @@
 #define LX_SO_AND       405     // &
 #define LX_SO_OR        406     // |
 #define LX_SO_IDIV      407     // %
-#define LX_SO_ASSIGN    408     // :
+#define LX_SO_ASSIGN    408     // =
+#define LX_SO_NOT       409     // !
+
+/*Double Operator*/
+#define LX_DO_ADDEQU    501     // +=
+#define LX_DO_SUBEQU    502     // -=
+#define LX_DO_MULEQU    503     // *=
+#define LX_DO_DIVEQU    504     // /=
+
+/*Single Comparator*/
+#define LX_SC_GT        601     // >
+#define LX_SC_LT        602     // <
+
+/*Double Comparator*/
+#define LX_DC_GE        701     // >=
+#define LX_DC_LE        702     // <=
+#define LX_DC_EQU       703     // ==
+#define LX_DC_NOTEQU    704     // !=
 
 
 #endif //AUTEX_LEXER_DEFS_H
