@@ -6,7 +6,7 @@
 
 LX_TYPE lexer_is_letter_(char c)
 {
-    if(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') return LX_IDF;
+    if(c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_') return LX_IDF;
     else return LX_IDF_ERR;
 }
 
@@ -16,7 +16,7 @@ LX_TYPE lexer_is_digit_(char c)
     else return LX_NUM_ERR;
 }
 
-LX_TYPE lexer_is_rsv_tokens_(char str[])
+LX_TYPE lexer_is_rsv_tokens_(char* str)
 {
     if(strcmp(str, "int") == 0) return LX_RSV_INT;
     else if(strcmp(str, "float") == 0) return LX_RSV_FLOAT;

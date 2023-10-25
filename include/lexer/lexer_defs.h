@@ -86,5 +86,8 @@
 #define LX_SC_ERR           -600
 #define LX_DC_ERR           -700
 
+/*Others*/
+#define LX_LINE             801     // \n
+
 
 #endif //AUTEX_LEXER_DEFS_H
