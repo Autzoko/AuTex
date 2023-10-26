@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <fstream>
+#include <algorithm>
 #include <streambuf>
 #include <iostream>
 #include <iterator>

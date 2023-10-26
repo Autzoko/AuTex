@@ -13,30 +13,22 @@ lexer::lexer(string file, string target) {
 void lexer::analyze() {
     char c = *input.begin();
 
-    for(string::iterator iter = ++input.begin(); iter != input.end(); iter++)
+    for(string::iterator iter = ++input.begin(); iter != input.end(); c = *iter, iter++)
     {
         if(c == '/' and *iter == '*') {
-            while (c != '*' and *iter != '/') {
-                iter++;
-                c = *iter;
-            }
+            iter++;
+            while (*iter != '*' and *(iter + 1) != '/') iter++;
             iter += 2;
-            c = *iter;
         }else if(c == '/' and *iter == '/'){
-            while(c != '\n')
-            {
-                iter++;
-                c = *iter;
-            }
+            iter++;
+            while(*iter != '\n') iter++;
         }else if(c == ' ' or c == '\t'){
-            c = *(iter);
+            // do nothing
         }else if(c == '\n'){
             tuples_.emplace_back(LX_LINE, "\n");
-            c = *(iter);
         }else if(lexer_is_letter_(c) == LX_IDF)
         {
-            string _tmp;
-            _tmp += c;
+            string _tmp(1, c);
             while(true)
             {
                 c = *iter;
@@ -47,34 +39,27 @@ void lexer::analyze() {
             LX_TYPE _type = lexer_is_rsv_tokens_(const_cast<char*>(_tmp.c_str()));
             tuples_.emplace_back(_type, _tmp);
         }else if(lexer_is_digit_(c) == LX_NUM){
-            string _tmp;
-            _tmp += c;
+            string _tmp(1, c);
             while(lexer_is_digit_(c) == LX_NUM)
             {
-                c = *iter;
+                c = *(iter++);
                 if(lexer_is_digit_(c) != LX_NUM) break;
-                iter++;
                 _tmp += c;
             }
             tuples_.emplace_back(LX_NUM, _tmp);
         }else if(lexer_is_symbols_(c) != LX_SYM_ERR){
-            string _tmp;
-            _tmp += c;
+            string _tmp(1, c);
             tuples_.emplace_back(lexer_is_symbols_(c), _tmp);
-            c = *iter;
         }else if(lexer_is_single_comparator_(c) != LX_SC_ERR){
-            string _tmp;
-            _tmp += c;
+            string _tmp(1, c);
             c = *(iter++);
             _tmp += c;
-            LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_comparator_(c), c);
+            LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_operator_(c), c);
             tuples_.emplace_back(_type, _tmp);
         }else if(lexer_is_single_operator_(c) != LX_SO_ERR){
-            string _tmp;
+            string _tmp(1, c);
             LX_TYPE _type = lexer_is_single_operator_(c);
-            _tmp += c;
-            iter++;
-            c = *iter;
+            c = *(iter++);
             if(c != '=' and c != '>' and c != '<')
             {
                 tuples_.emplace_back(_type, _tmp);
@@ -128,47 +113,29 @@ void lexer::write_() {
 }
 
 void lexer::categorize_() {
-    for(auto & iter : tuples_)
-    {
-        if(iter.first > 100 and iter.first <= 200)
-        {
+    for(auto & iter : tuples_){
+        if(iter.first > 100 and iter.first <= 200){
             cates.emplace_back(LX_RESERVED_TOKEN, iter.second);
-            continue;
-        }
-
-        if(iter.first == LX_USR_IDF)
+        }else if(iter.first == LX_USR_IDF)
         {
             cates.emplace_back(LX_USER_TOKEN, iter.second);
-            continue;
-        }
-
-        if(iter.first > 400 and iter.first < 500 or iter.first > 500 and iter.first < 600)
+        }else if(iter.first > 400 and iter.first < 500 or iter.first > 500 and iter.first < 600)
         {
             cates.emplace_back(LX_MATH_OPR, iter.second);
-            continue;
-        }
-
-        if(iter.first > 600 and iter.first < 700 or iter.first > 700 and iter.first < 800)
+        }else if(iter.first > 600 and iter.first < 700 or iter.first > 700 and iter.first < 800)
         {
             cates.emplace_back(LX_LOGIC_OPR, iter.second);
-            continue;
-        }
-
-        if(iter.first > 300 and iter.first <= 400)
+        }else if(iter.first > 300 and iter.first <= 400)
         {
             cates.emplace_back(LX_SEPARATOR, iter.second);
-            continue;
-        }
-
-        if(iter.first == LX_LINE)
+        }else if(iter.first == LX_LINE)
         {
             cates.emplace_back(iter);
-            continue;
-        }
-
-        if(iter.first == LX_NUM)
+        }else if(iter.first == LX_NUM)
         {
             cates.emplace_back(LX_UINT, iter.second);
+        }else{
+            cerr << "error occurred during categorizing." << endl;
         }
     }
 }
@@ -190,3 +157,4 @@ void lexer::generate() {
     write_tuples();
     write_();
 }
+
