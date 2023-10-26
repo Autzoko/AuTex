@@ -29,8 +29,7 @@ void lexer::analyze() {
         }else if(lexer_is_letter_(c) == LX_IDF)
         {
             string _tmp(1, c);
-            while(true)
-            {
+            while(true){
                 c = *iter;
                 if(lexer_is_letter_(c) != LX_IDF and lexer_is_digit_(c) != LX_NUM) break;
                 iter++;
