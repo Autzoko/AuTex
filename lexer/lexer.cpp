@@ -3,16 +3,15 @@
 //
 
 
+#include <utility>
+
 #include "../include/lexer/lexer.h"
 
 
 lexer::lexer(string file, string target) {
-    this->target_file = std::move(file);
+    this->source_file = std::move(file);
     this->target_file = std::move(target);
-    cout << "read file" << endl;
     read_file();
-    cout << "analyze" << endl;
-    debug_print_input();
     analyze();
     cout << "write tuples" << endl;
     write_tuples();
@@ -26,18 +25,20 @@ void lexer::analyze() {
     NOTE_FLAG noteFlag = 0;
     LINE_FLAG lineFlag = 0;
 
-    for(auto & iter : input)
+    for(string::iterator iter = ++input.begin(); iter != input.end(); iter++)
     {
-        if(iter == ' ' or iter == '\t')
+        cout << c << endl;
+        debug_print_tuples();
+        if(c == ' ' or c == '\t')
         {
-            c = ++iter;
+            c = *(iter);
             continue;
         }
 
         if(c == '\n')
         {
             tuples_.emplace_back(LX_LINE, "\n");
-            c = ++iter;
+            c = *(iter);
             continue;
         }
 
@@ -45,11 +46,14 @@ void lexer::analyze() {
         {
             string _tmp;
             _tmp += c;
-            while(lexer_is_letter_(c) == LX_IDF or lexer_is_digit_(c) == LX_NUM)
+            while(true)
             {
-                c = ++iter;
+                c = *iter;
+                if(lexer_is_letter_(c) != LX_IDF and lexer_is_digit_(c) != LX_NUM) break;
+                iter++;
                 _tmp += c;
             }
+            cout << _tmp << endl;
             LX_TYPE _type = lexer_is_rsv_tokens_(const_cast<char*>(_tmp.c_str()));
             tuples_.emplace_back(_type, _tmp);
             continue;
@@ -61,7 +65,9 @@ void lexer::analyze() {
             _tmp += c;
             while(lexer_is_digit_(c) == LX_NUM)
             {
-                c = ++iter;
+                c = *iter;
+                if(lexer_is_digit_(c) != LX_NUM) break;
+                iter++;
                 _tmp += c;
             }
             tuples_.emplace_back(LX_NUM, _tmp);
@@ -70,12 +76,11 @@ void lexer::analyze() {
 
         if(lexer_is_symbols_(c) != LX_SYM_ERR)
         {
-            tuples_.emplace_back(lexer_is_symbols_(c), string(reinterpret_cast<const char *>(c)));
-            continue;
-        }
-        else
-        {
-            tuples_.emplace_back(LX_SYM_ERR, string(reinterpret_cast<const char *>(c)));
+            string _tmp;
+            _tmp += c;
+            tuples_.emplace_back(lexer_is_symbols_(c), _tmp);
+            //iter++;
+            c = *iter;
             continue;
         }
 
@@ -83,8 +88,9 @@ void lexer::analyze() {
         {
             string _tmp;
             _tmp += c;
-            c = ++iter;
+            c = *(iter++);
             _tmp += c;
+            cout << "dc" << _tmp << endl;
             LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_comparator_(c), c);
             tuples_.emplace_back(_type, _tmp);
             continue;
@@ -93,12 +99,18 @@ void lexer::analyze() {
         if(lexer_is_single_operator_(c) != LX_SO_ERR)
         {
             string _tmp;
+            LX_TYPE _type = lexer_is_single_operator_(c);
             _tmp += c;
-            c = ++iter;
+            iter++;
+            c = *iter;
+            if(c != '=' and c != '>' and c != '<')
+            {
+                tuples_.emplace_back(_type, _tmp);
+                continue;
+            }
+            _type = lexer_is_double_operator_(_type, c);
             _tmp += c;
-            LX_TYPE _type = lexer_is_double_operator_(lexer_is_single_operator_(c), c);
             tuples_.emplace_back(_type, _tmp);
-            continue;
         }
     }
 }
@@ -120,8 +132,12 @@ void lexer::write_tuples() {
 }
 
 void lexer::read_file() {
-    ifstream fr(source_file);
-    string _tmp((istreambuf_iterator<char>(fr)), istreambuf_iterator<char>());
+    ifstream fr;
+    fr.open(source_file, ios::in);
+    if(!fr.is_open()) cout << "Not opened" << endl;
+    istreambuf_iterator<char> begin(fr);
+    istreambuf_iterator<char> end;
+    string _tmp(begin, end);
     input = _tmp;
 }
 

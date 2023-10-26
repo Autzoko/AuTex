@@ -5,6 +5,6 @@
 
 int main()
 {
-    lexer lex("test.ax", "test_out.mid");
+    lexer lex("../test.txt", "../test_out.mid");
     return 0;
 }

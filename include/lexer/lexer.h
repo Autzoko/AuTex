@@ -12,6 +12,7 @@
 #include <fstream>
 #include <streambuf>
 #include <iostream>
+#include <iterator>
 using namespace std;
 
 
