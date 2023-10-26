@@ -1,7 +1,11 @@
 int main()
 {
-    int a = 100, b = 200, c;
-    c += (a + b); //this is comment
-    /*para comment*/
+    /*
+        this codes is for testing
+    */
+    int a = 1, b = 2, c; //assign values
+    if(a >= 0) c = a + b;
+    elif(b <= 0) c = a - b;
+    else c *= (a % b);
     return c;
 }
