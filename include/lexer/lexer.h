@@ -19,6 +19,7 @@ using namespace std;
 class lexer {
 private:
     string source_file;
+    const string mid_file = "../test/intermediate/tmp.axm";
     string target_file;
     string input;
     vector<pair<LX_TYPE, string>> tuples_;
@@ -31,6 +32,8 @@ private:
     void write_();
 public:
     lexer(string file, string target);
+    vector<pair<LX_TYPE, string>> get_tuples();
+    vector<pair<LX_TYPE, string>> get_output();
 
 };
 

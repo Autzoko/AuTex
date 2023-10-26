@@ -14,6 +14,8 @@ lexer::lexer(string file, string target) {
     read_file();
     analyze();
     write_tuples();
+    categorize_();
+    write_();
 }
 
 void lexer::analyze() {
@@ -23,6 +25,8 @@ void lexer::analyze() {
     char c = *input.begin();
     NOTE_FLAG noteFlag = 0;
     LINE_FLAG lineFlag = 0;
+
+    cout << "haha" << endl;
 
     for(string::iterator iter = ++input.begin(); iter != input.end(); iter++)
     {
@@ -114,7 +118,8 @@ void lexer::analyze() {
 
 void lexer::write_tuples() {
     ofstream fw;
-    fw.open(target_file, ios::out);
+    fw.open(mid_file, ios::out);
+    if(!fw.is_open()) cerr << "Intermediate file open failed." << endl;
     for(auto & iter : tuples_)
     {
         if(iter.first == LX_LINE)
@@ -131,7 +136,7 @@ void lexer::write_tuples() {
 void lexer::read_file() {
     ifstream fr;
     fr.open(source_file, ios::in);
-    if(!fr.is_open()) cerr << "Not opened" << endl;
+    if(!fr.is_open()) cout << "Source file open failed." << endl;
     istreambuf_iterator<char> begin(fr);
     istreambuf_iterator<char> end;
     string _tmp(begin, end);
@@ -139,7 +144,14 @@ void lexer::read_file() {
 }
 
 void lexer::write_() {
-
+    ofstream fw;
+    fw.open(target_file, ios::out);
+    if(!fw.is_open()) cerr << "Target file open failed." << endl;
+    for(auto & iter : cates)
+    {
+        if(iter.first == LX_LINE) fw << endl;
+        else fw << "(" << iter.first << ", " << iter.second << ") ";
+    }
 }
 
 void lexer::categorize_() {
@@ -174,5 +186,19 @@ void lexer::categorize_() {
             cates.emplace_back(LX_SEPARATOR, iter.second);
             continue;
         }
+
+        if(iter.first == LX_LINE)
+        {
+            cates.emplace_back(iter);
+            continue;
+        }
     }
+}
+
+vector<pair<LX_TYPE, string>> lexer::get_tuples() {
+    return tuples_;
+}
+
+vector<pair<LX_TYPE, string>> lexer::get_output() {
+    return cates;
 }
