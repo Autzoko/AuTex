@@ -1,6 +1,7 @@
 int main()
 {
     int a = 100, b = 200, c;
-    c = a + b;
+    c = a + b; //this is comment
+    /*para comment*/
     return c;
 }

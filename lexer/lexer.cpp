@@ -26,11 +26,30 @@ void lexer::analyze() {
     NOTE_FLAG noteFlag = 0;
     LINE_FLAG lineFlag = 0;
 
-    cout << "haha" << endl;
 
     for(string::iterator iter = ++input.begin(); iter != input.end(); iter++)
     {
-        cout << c << endl;
+        if(c == '/' and *iter == '*')
+        {
+            while(c != '*' and *iter != '/')
+            {
+                iter++;
+                c = *iter;
+            }
+            iter += 2;
+            c = *iter;
+            continue;
+        }
+
+        if(c == '/' and *iter == '/')
+        {
+            while(c != '\n')
+            {
+                iter++;
+                c = *iter;
+            }
+            continue;
+        }
         if(c == ' ' or c == '\t')
         {
             c = *(iter);
@@ -191,6 +210,11 @@ void lexer::categorize_() {
         {
             cates.emplace_back(iter);
             continue;
+        }
+
+        if(iter.first == LX_NUM)
+        {
+            cates.emplace_back(LX_UINT, iter.second);
         }
     }
 }

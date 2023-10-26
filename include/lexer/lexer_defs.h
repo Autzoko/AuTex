@@ -89,11 +89,17 @@
 /*Others*/
 #define LX_LINE             801     // \n
 
+/*Comment*/
+#define LX_CMT_LPARA        901     // /*
+#define LX_CMT_RPARA        902     // */
+#define LX_CMT_LINE         903     // //
+
 /*Category*/
 #define LX_RESERVED_TOKEN   1
 #define LX_USER_TOKEN       2
 #define LX_MATH_OPR         3
 #define LX_LOGIC_OPR        4
 #define LX_SEPARATOR        5
+#define LX_UINT             6
 
 #endif //AUTEX_LEXER_DEFS_H
