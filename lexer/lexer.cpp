@@ -13,7 +13,6 @@ lexer::lexer(string file, string target) {
     this->target_file = std::move(target);
     read_file();
     analyze();
-    cout << "write tuples" << endl;
     write_tuples();
 }
 
@@ -28,7 +27,6 @@ void lexer::analyze() {
     for(string::iterator iter = ++input.begin(); iter != input.end(); iter++)
     {
         cout << c << endl;
-        debug_print_tuples();
         if(c == ' ' or c == '\t')
         {
             c = *(iter);
@@ -79,7 +77,6 @@ void lexer::analyze() {
             string _tmp;
             _tmp += c;
             tuples_.emplace_back(lexer_is_symbols_(c), _tmp);
-            //iter++;
             c = *iter;
             continue;
         }
@@ -134,20 +131,48 @@ void lexer::write_tuples() {
 void lexer::read_file() {
     ifstream fr;
     fr.open(source_file, ios::in);
-    if(!fr.is_open()) cout << "Not opened" << endl;
+    if(!fr.is_open()) cerr << "Not opened" << endl;
     istreambuf_iterator<char> begin(fr);
     istreambuf_iterator<char> end;
     string _tmp(begin, end);
     input = _tmp;
 }
 
-void lexer::debug_print_tuples() {
-    for(auto & iter : tuples_)
-    {
-        cout << "(" << iter.first << ", " << iter.second << ")" << endl;
-    }
+void lexer::write_() {
+
 }
 
-void lexer::debug_print_input() {
-    cout << input << endl;
+void lexer::categorize_() {
+    for(auto & iter : tuples_)
+    {
+        if(iter.first > 100 and iter.first <= 200)
+        {
+            cates.emplace_back(LX_RESERVED_TOKEN, iter.second);
+            continue;
+        }
+
+        if(iter.first == LX_USR_IDF)
+        {
+            cates.emplace_back(LX_USER_TOKEN, iter.second);
+            continue;
+        }
+
+        if(iter.first > 400 and iter.first < 500 or iter.first > 500 and iter.first < 600)
+        {
+            cates.emplace_back(LX_MATH_OPR, iter.second);
+            continue;
+        }
+
+        if(iter.first > 600 and iter.first < 700 or iter.first > 700 and iter.first < 800)
+        {
+            cates.emplace_back(LX_LOGIC_OPR, iter.second);
+            continue;
+        }
+
+        if(iter.first > 300 and iter.first <= 400)
+        {
+            cates.emplace_back(LX_SEPARATOR, iter.second);
+            continue;
+        }
+    }
 }

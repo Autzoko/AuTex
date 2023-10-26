@@ -22,13 +22,13 @@ private:
     string target_file;
     string input;
     vector<pair<LX_TYPE, string>> tuples_;
+    vector<pair<LX_TYPE, string>> cates;
 
     void analyze();
     void write_tuples();
     void read_file();
-
-    void debug_print_tuples();
-    void debug_print_input();
+    void categorize_();
+    void write_();
 public:
     lexer(string file, string target);
 
