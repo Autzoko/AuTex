@@ -6,5 +6,7 @@
 int main()
 {
     lexer lex("../test/source/test.ax", "../test/target/_out.tgt");
+    lex.lex(false);
+    lex.generate();
     return 0;
 }

@@ -12,10 +12,6 @@ lexer::lexer(string file, string target) {
     this->source_file = std::move(file);
     this->target_file = std::move(target);
     read_file();
-    analyze();
-    write_tuples();
-    categorize_();
-    write_();
 }
 
 void lexer::analyze() {
@@ -74,7 +70,6 @@ void lexer::analyze() {
                 iter++;
                 _tmp += c;
             }
-            cout << _tmp << endl;
             LX_TYPE _type = lexer_is_rsv_tokens_(const_cast<char*>(_tmp.c_str()));
             tuples_.emplace_back(_type, _tmp);
             continue;
@@ -110,7 +105,6 @@ void lexer::analyze() {
             _tmp += c;
             c = *(iter++);
             _tmp += c;
-            cout << "dc" << _tmp << endl;
             LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_comparator_(c), c);
             tuples_.emplace_back(_type, _tmp);
             continue;
@@ -225,4 +219,14 @@ vector<pair<LX_TYPE, string>> lexer::get_tuples() {
 
 vector<pair<LX_TYPE, string>> lexer::get_output() {
     return cates;
+}
+
+void lexer::lex(bool verbose) {
+    analyze();
+    categorize_();
+}
+
+void lexer::generate() {
+    write_tuples();
+    write_();
 }

@@ -32,6 +32,8 @@ private:
     void write_();
 public:
     lexer(string file, string target);
+    void lex(bool verbose);
+    void generate();
     vector<pair<LX_TYPE, string>> get_tuples();
     vector<pair<LX_TYPE, string>> get_output();
 
