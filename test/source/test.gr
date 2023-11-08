@@ -1,0 +1,10 @@
+G[S]
+S:V=E
+E:TP
+P:ATP,e
+T:FR
+R:MFR,e
+F:(E),i
+A:+,-
+M:*,/
+V:i

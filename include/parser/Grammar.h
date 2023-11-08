@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -24,8 +25,18 @@ private:
     map<NonTerminal, vector<string>> grammarRules;
     map<NonTerminal, FirstSet> firstSets;
     map<NonTerminal, FollowSet> followSets;
+    set<string> nonTerminalSet;
+
+    bool isNonTerminal(const string& symbol);
 public:
     explicit Grammar(const string& grammarFile);
+    static vector<string> split(const string& input, char delimiter);
+    FirstSet calFirst(const string& symbol);
+    void calFollow(const string& symbol, const string& leftContext = "");
+
+    void printGrammar();
+    void printFirstSet();
+    void printFollowSets();
 };
 
 #endif //AUTEX_GRAMMAR_H
