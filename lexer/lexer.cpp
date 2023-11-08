@@ -53,7 +53,7 @@ void lexer::analyze() {
             string _tmp(1, c);
             c = *(iter++);
             _tmp += c;
-            LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_operator_(c), c);
+            LX_TYPE _type = lexer_is_double_comparator_(lexer_is_single_comparator_(c), c);
             tuples_.emplace_back(_type, _tmp);
         }else if(lexer_is_single_operator_(c) != LX_SO_ERR){
             string _tmp(1, c);
