@@ -73,6 +73,12 @@ build CMakeFiles/AuTex.dir/parser/Grammar.cpp.obj: CXX_COMPILER__AuTex_Debug C$:
   OBJECT_DIR = CMakeFiles\AuTex.dir
   OBJECT_FILE_DIR = CMakeFiles\AuTex.dir\parser
 
+build CMakeFiles/AuTex.dir/parser/Parser.cpp.obj: CXX_COMPILER__AuTex_Debug C$:/Users/llt02/Desktop/AuTex/parser/Parser.cpp || cmake_object_order_depends_target_AuTex
+  DEP_FILE = CMakeFiles\AuTex.dir\parser\Parser.cpp.obj.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu++23
+  OBJECT_DIR = CMakeFiles\AuTex.dir
+  OBJECT_FILE_DIR = CMakeFiles\AuTex.dir\parser
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target AuTex
@@ -81,7 +87,7 @@ build CMakeFiles/AuTex.dir/parser/Grammar.cpp.obj: CXX_COMPILER__AuTex_Debug C$:
 #############################################
 # Link the executable AuTex.exe
 
-build AuTex.exe: CXX_EXECUTABLE_LINKER__AuTex_Debug CMakeFiles/AuTex.dir/main.cpp.obj CMakeFiles/AuTex.dir/lexer/lexer_utils.cpp.obj CMakeFiles/AuTex.dir/lexer/lexer.cpp.obj CMakeFiles/AuTex.dir/parser/Grammar.cpp.obj
+build AuTex.exe: CXX_EXECUTABLE_LINKER__AuTex_Debug CMakeFiles/AuTex.dir/main.cpp.obj CMakeFiles/AuTex.dir/lexer/lexer_utils.cpp.obj CMakeFiles/AuTex.dir/lexer/lexer.cpp.obj CMakeFiles/AuTex.dir/parser/Grammar.cpp.obj CMakeFiles/AuTex.dir/parser/Parser.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\AuTex.dir

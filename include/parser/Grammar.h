@@ -38,6 +38,10 @@ public:
     void printGrammar();
     void printFirstSet();
     void printFollowSets();
+
+    map<NonTerminal, vector<string>> getGrammarRules();
+    FirstSet getFirstSetOf(const string& token);
+    set<string> getNonTerminals();
 };
 
 #endif //AUTEX_GRAMMAR_H

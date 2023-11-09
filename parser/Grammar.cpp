@@ -107,7 +107,6 @@ map<NonTerminal, FollowSet> Grammar::calFollow() {
     }
     map<NonTerminal, FollowSet> tmpFollow;
     for(const auto& rule : grammarRules) {
-        cout << rule.first << " : ";
         for(const string& candidate : rule.second) {
             for(int i = 0; i < candidate.length(); i++) {
                 char token = candidate[i];
@@ -130,5 +129,17 @@ map<NonTerminal, FollowSet> Grammar::calFollow() {
         }
     }
     return tmpFollow;
+}
+
+map<NonTerminal, vector<string>> Grammar::getGrammarRules() {
+    return grammarRules;
+}
+
+FirstSet Grammar::getFirstSetOf(const string& token) {
+    return firstSets[token];
+}
+
+set<string> Grammar::getNonTerminals() {
+    return nonTerminalSet;
 }
 
