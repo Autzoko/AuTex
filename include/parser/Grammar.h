@@ -12,6 +12,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -32,7 +33,7 @@ public:
     explicit Grammar(const string& grammarFile);
     static vector<string> split(const string& input, char delimiter);
     FirstSet calFirst(const string& symbol);
-    void calFollow(const string& symbol, const string& leftContext = "");
+    map<NonTerminal, FollowSet> calFollow();
 
     void printGrammar();
     void printFirstSet();

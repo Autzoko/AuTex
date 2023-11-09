@@ -23,9 +23,8 @@ Grammar::Grammar(const string& grammarFile) {
     for(auto& item : nonTerminalSet) {
         firstSets.insert(make_pair(item, calFirst(item)));
     }
-    for(auto& item : nonTerminalSet) {
-        calFollow(item);
-    }
+
+    followSets = calFollow();
 }
 
 vector<string> Grammar::split(const string &input, char delimiter) {
@@ -91,27 +90,6 @@ void Grammar::printFirstSet() {
     }
 }
 
-void Grammar::calFollow(const string &symbol, const string &leftContext) {
-    const auto& rule = grammarRules[leftContext];
-    for(const string& production : rule) {
-        for(size_t i = 0; i < production.length(); ++i) {
-            if(production[i] == symbol[0]) {
-                if(i + 1 < production.length()) {
-                    const FirstSet& firstOfNext = calFirst(string(1, production[i + 1]));
-                    followSets[symbol].insert(firstOfNext.begin(), firstOfNext.end());
-                    if(firstOfNext.find("") != firstOfNext.end()) {
-                        followSets[symbol].erase("");
-                        calFollow(symbol, leftContext);
-                    }
-                } else if(leftContext != "") {
-                    calFollow(leftContext);
-                    followSets[symbol].insert(followSets[leftContext].begin(), followSets[leftContext].end());
-                }
-            }
-        }
-    }
-}
-
 void Grammar::printFollowSets() {
     for(auto& followSet : followSets) {
         cout << followSet.first << " : ";
@@ -120,5 +98,37 @@ void Grammar::printFollowSets() {
         }
         cout << endl;
     }
+}
+
+map<NonTerminal, FollowSet> Grammar::calFollow() {
+    if(firstSets.empty()) {
+        cerr << "Invalid FIRST sets, program error." << endl;
+        exit(1);
+    }
+    map<NonTerminal, FollowSet> tmpFollow;
+    for(const auto& rule : grammarRules) {
+        cout << rule.first << " : ";
+        for(const string& candidate : rule.second) {
+            for(int i = 0; i < candidate.length(); i++) {
+                char token = candidate[i];
+                if(isNonTerminal(string(1, token))) {
+                    if(i + 1 == candidate.length()) {
+                        tmpFollow[string(1, token)].insert("#");
+                        break;
+                    }
+                    char next = candidate[i + 1];
+                    if(!isNonTerminal(string(1, next))) {
+                        tmpFollow[string(1, token)].insert(string(1, next));
+                    } else {
+                        string _next = string(1, next);
+                        string _token = string(1, token);
+                        set_union(firstSets[_next].begin(), firstSets[_next].end(), tmpFollow[_token].begin(), tmpFollow[_token].end(),
+                                  inserter(tmpFollow[_token], tmpFollow[_token].begin()));
+                    }
+                }
+            }
+        }
+    }
+    return tmpFollow;
 }
 
