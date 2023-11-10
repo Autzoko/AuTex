@@ -146,10 +146,10 @@ set<string> Grammar::getNonTerminals() {
 }
 
 void Grammar::calSelect(const NonTerminal& nonTerminal) {
-    FirstSet firstSetOfNonTerminal = firstSets[nonTerminal];
+    vector<string> rules = grammarRules[nonTerminal];
     using SelectSets = tuple<NonTerminal, string, SelectSet>;
     SelectSets _selectSet;
-    for(auto& production : firstSetOfNonTerminal) {
+    for(auto& production : rules) {
         SelectSet _tmp;
         for(auto& token : production) {
             if(!isNonTerminal(string(1, token))) {
@@ -179,9 +179,10 @@ void Grammar::calAllSelect() {
 }
 
 void Grammar::printSelectSets() {
-    cout << "Non-terminal\t\t" << "Production\t\t" << "Select set" << endl;
+    cout << "-------------------------------------------------------------" << endl;
+    cout << "Non-terminal\t|\t" << "Production|\t" << "Select set" << endl;
     for(auto& item : selectSets) {
-        cout << std::get<0>(item) << "\t\t" << std::get<1>(item) << "\t\t";
+        cout << "     " << std::get<0>(item) << "\t\t|\t" << std::get<1>(item) << "\t\t|\t";
         for(auto& token : std::get<2>(item)) {
             cout << token << " ";
         }
