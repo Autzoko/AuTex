@@ -25,6 +25,8 @@ Grammar::Grammar(const string& grammarFile) {
     }
 
     followSets = calFollow();
+
+    calAllSelect();
 }
 
 vector<string> Grammar::split(const string &input, char delimiter) {
@@ -141,5 +143,49 @@ FirstSet Grammar::getFirstSetOf(const string& token) {
 
 set<string> Grammar::getNonTerminals() {
     return nonTerminalSet;
+}
+
+void Grammar::calSelect(const NonTerminal& nonTerminal) {
+    FirstSet firstSetOfNonTerminal = firstSets[nonTerminal];
+    using SelectSets = tuple<NonTerminal, string, SelectSet>;
+    SelectSets _selectSet;
+    for(auto& production : firstSetOfNonTerminal) {
+        SelectSet _tmp;
+        for(auto& token : production) {
+            if(!isNonTerminal(string(1, token))) {
+                _tmp.insert(string(1, token));
+            } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 0) {
+                FirstSet _tmpSet = firstSets[string(1, token)];
+                set_union(_tmp.begin(), _tmp.end(), _tmpSet.begin(), _tmpSet.end(), inserter(_tmp, _tmp.begin()));
+            } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 1) {
+                FollowSet _tmpFollow = followSets[nonTerminal];
+                FirstSet _tmpFirst = firstSets[string(1, token)];
+                _tmpFirst.erase("e");
+
+                set_union(_tmpFirst.begin(), _tmpFirst.end(), _tmpFollow.begin(), _tmpFollow.end(), inserter(_tmp, _tmp.begin()));
+            } else {
+                cerr << "Select set error. Mistake found at token \"" << nonTerminal << "\"." << endl;
+                throw std::runtime_error("Parser error.");
+            }
+        }
+       selectSets.insert(SelectSets(nonTerminal, production, _tmp));
+    }
+}
+
+void Grammar::calAllSelect() {
+    for(auto& token : nonTerminalSet) {
+        calSelect(token);
+    }
+}
+
+void Grammar::printSelectSets() {
+    cout << "Non-terminal\t\t" << "Production\t\t" << "Select set" << endl;
+    for(auto& item : selectSets) {
+        cout << std::get<0>(item) << "\t\t" << std::get<1>(item) << "\t\t";
+        for(auto& token : std::get<2>(item)) {
+            cout << token << " ";
+        }
+        cout << endl;
+    }
 }
 

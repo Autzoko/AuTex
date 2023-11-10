@@ -5,23 +5,30 @@
 
 #include "../include/parser/Parser.h"
 
-NonTerminalToken::NonTerminalToken(string token_name, vector<string> candidates) : Token(token_name) {
-    this->candidates = std::move(candidates);
+string NonTerminalToken::getName() const {
+    return token_name;
 }
 
+void NonTerminalToken::error() {
+    cerr << "Non-terminal token error: " << token_name << endl;
+    throw std::runtime_error("Syntax error.");
+}
 
-
-bool TerminalToken::match(string currentToken) {
-    if(currentToken == token_name) return true;
-    else return false;
+string TerminalToken::getName() const {
+    return token_name;
 }
 
 void TerminalToken::error() {
-    cerr << "Syntax error at token: " << token_name << endl;
-    throw std::runtime_error("Invalid token.");
+    cerr << "Terminal token error: " << token_name << endl;
+    throw std::runtime_error("Syntax error.");
 }
 
-void Token::error() {
-    cerr << "Syntax error." << endl;
-    throw std::runtime_error("Invalid token.");
+bool TerminalToken::match(const string &Input) {
+    getInput(Input);
+    if(currentInput == token_name) return true;
+    else return false;
+}
+
+void Token::getInput(const string &Input) {
+    currentInput = Input;
 }

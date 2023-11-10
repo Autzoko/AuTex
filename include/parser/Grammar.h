@@ -13,11 +13,13 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <tuple>
 
 using namespace std;
 
 using FirstSet = set<string>;
 using FollowSet = set<string>;
+using SelectSet = set<string>;
 using NonTerminal = string;
 
 class Grammar
@@ -26,6 +28,7 @@ private:
     map<NonTerminal, vector<string>> grammarRules;
     map<NonTerminal, FirstSet> firstSets;
     map<NonTerminal, FollowSet> followSets;
+    set<tuple<NonTerminal, string, SelectSet>> selectSets;
     set<string> nonTerminalSet;
 
     bool isNonTerminal(const string& symbol);
@@ -34,10 +37,13 @@ public:
     static vector<string> split(const string& input, char delimiter);
     FirstSet calFirst(const string& symbol);
     map<NonTerminal, FollowSet> calFollow();
+    void calSelect(const NonTerminal& nonTerminal);
+    void calAllSelect();
 
     void printGrammar();
     void printFirstSet();
     void printFollowSets();
+    void printSelectSets();
 
     map<NonTerminal, vector<string>> getGrammarRules();
     FirstSet getFirstSetOf(const string& token);

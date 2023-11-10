@@ -3,6 +3,7 @@
 //
 #include "include/lexer/lexer.h"
 #include "include/parser/Grammar.h"
+#include "include/parser/Parser.h"
 
 int main()
 {
@@ -15,6 +16,9 @@ int main()
     g.printFirstSet();
     cout << "--------------------------------------" << endl;
     g.printFollowSets();
+
+    g.printSelectSets();
+
 
     return 0;
 }
