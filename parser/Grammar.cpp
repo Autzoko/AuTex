@@ -108,7 +108,7 @@ void Grammar::printFollowSets() {
 map<NonTerminal, FollowSet> Grammar::calFollow() {
     if(firstSets.empty()) {
         cerr << "Invalid FIRST sets, program error." << endl;
-        exit(1);
+        throw std::runtime_error("Parser error");
     }
     map<NonTerminal, FollowSet> tmpFollow;
     bool isUpdated = true;
