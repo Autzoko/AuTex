@@ -5,61 +5,42 @@
 
 #include "../include/parser/Parser.h"
 
-string NonTerminalToken::getName() const {
-    return token_name;
-}
-
-void NonTerminalToken::error() {
-    cerr << "Non-terminal token error: " << token_name << endl;
-    throw std::runtime_error("Syntax error.");
-}
-
-string TerminalToken::getName() const {
-    return token_name;
-}
-
-void TerminalToken::error() {
-    cerr << "Terminal token error: " << token_name << endl;
-    throw std::runtime_error("Syntax error.");
-}
-
-bool TerminalToken::match(const string &Input) {
-    getInput(Input);
-    if(currentInput == token_name) return true;
-    else return false;
-}
-
-void Token::getInput(const string &Input) {
-    currentInput = Input;
-}
-
-Parser::Parser(Grammar grammar, const string& input) {
+Parser::Parser(Grammar grammar) {
     selectSets = grammar.getSelectSets();
-    inputString = input + "#";
     tokenStack.emplace("#");
     tokenStack.push(grammar.getStartToken());
     nonTerminalSet = grammar.getNonTerminals();
 
-    parse();
 }
 
-void Parser::parse() {
+void Parser::parse(const string& input) {
     int stringIndex = 0;
+    string inputString = input + "#";
+    fetchLog(getCurrentStack(), string(1, inputString[0]), inputString, "");
     while(true) {
         string cur_top = tokenStack.top();
+        string useProduction;
+        if(cur_top == "#" && tokenStack.size() == 1) {
+            cout << "Parsing finished." << endl;
+            break;
+        }
         char& curChar = inputString[stringIndex];
-        //cout << "top: " << cur_top << endl;
-        //cout << "char: " << curChar << endl;
-        if(!isNonterminal(cur_top)) {
+        if(!isNonTerminal(cur_top)) {
             if(cur_top == string(1, curChar)) {
                 stringIndex++;
                 tokenStack.pop();
+            } else {
+                cerr << "Token: " << curChar << " not match." << endl;
+                cerr << "Expected: " << cur_top << ", but found: " << curChar << "." << endl;
+                throw std::runtime_error("Syntax error");
             }
-        } else if(isNonterminal(cur_top)) {
+        } else if(isNonTerminal(cur_top)) {
             string selectProduction = getProduction(cur_top, string(1, curChar));
             if(selectProduction == "e") {
+                useProduction = tokenStack.top() + " -> " + selectProduction;
                 tokenStack.pop();
             } else {
+                useProduction = tokenStack.top() + " -> " + selectProduction;
                 std::reverse(selectProduction.begin(), selectProduction.end());
                 tokenStack.pop();
                 for(auto& t : selectProduction) {
@@ -70,21 +51,9 @@ void Parser::parse() {
             cerr << "stacking parser error." << endl;
             throw std::runtime_error("Parser error");
         }
-        if(cur_top == "#" && tokenStack.size() == 1) {
-            cout << "Parsing finished." << endl;
-            break;
-        }
-        cout << "\tToken Stack\t|\tCurrent Input\t|\tSelect Production\t" << endl;
-        stack<string> tmpStack = tokenStack;
-        cout << "\t";
-        while(!tmpStack.empty()) {
-            cout << tmpStack.top();
-            tmpStack.pop();
-        }
-        cout << "|\t" << curChar << endl;
-
+        string sequence = inputString.substr(stringIndex);
+        fetchLog(getCurrentStack(), string(1, curChar), sequence, useProduction);
     }
-
 }
 
 string Parser::getProduction(const string& token, const string& input) {
@@ -93,11 +62,63 @@ string Parser::getProduction(const string& token, const string& input) {
             return std::get<1>(item);
         }
     }
-    cerr << "Can not find select production." << endl;
-    throw std::runtime_error("Parser error");
+    cerr << "Can not find SELECT production." << endl;
+    cerr << "Error: " << "\"" << input << "\"." << endl;
+    throw std::runtime_error("Syntax error");
 }
 
-bool Parser::isNonterminal(const string &token) {
+bool Parser::isNonTerminal(const string &token) {
     if(nonTerminalSet.count(token) == 0) return false;
     else return true;
+}
+
+void Parser::emit(const string &input) {
+    parse(input);
+}
+
+string Parser::getCurrentStack() noexcept {
+    stack<string> _stack = tokenStack;
+    string stackContent;
+    while(!_stack.empty()) {
+        stackContent += _stack.top();
+        _stack.pop();
+    }
+    std::reverse(stackContent.begin(), stackContent.end());
+    return stackContent;
+}
+
+void Parser::fetchLog(const string &stackContent, const string &curInput, const string &seq, const string &select) {
+    logItem item = logItem(stackContent, curInput, seq, select);
+    parserLog.push_back(item);
+}
+
+void Parser::printLog() noexcept {
+    for(int i = 0; i < 87; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    cout << "|";
+    cout << setw(20) << std::left << "Token Stack" << "|";
+    cout << setw(20) << std::left << "Current Symbol" << "|";
+    cout << setw(20) << std::left << "Remain Sequence" << "|";
+    cout << setw(22) << std::left << "Selected Production" << "|";
+    cout << endl;
+
+    for(int i = 0; i < 87; i++) {
+        cout << "=";
+    }
+    cout << endl;
+
+    for(auto& item : parserLog) {
+        cout << "|";
+        cout << setw(20) << std::left << std::get<0>(item) << "|";
+        cout << setw(20) << std::left << std::get<1>(item) << "|";
+        cout << setw(20) << std::left << std::get<2>(item) << "|";
+        cout << setw(22) << std::left << std::get<3>(item) << "|";
+        cout << endl;
+        for(int i = 0; i < 87; i++) {
+            cout << "-";
+        }
+        cout << endl;
+    }
 }

@@ -10,58 +10,29 @@
 #include <utility>
 #include <unordered_set>
 #include <stack>
+#include <iomanip>
 
 using namespace std;
 
-
-class Token
-{
-protected:
-    string currentInput;
-    string token_name;
-
-    void getInput(const string& Input);
-
-public:
-    Token(string  token_name) : token_name(std::move(token_name)) {};
-    virtual string getName() const = 0;
-    virtual void error() = 0;
-};
-
-class NonTerminalToken : public Token
-{
-private:
-    vector<string> candidates;
-public:
-    NonTerminalToken(const string& token_name, const vector<string>& candidates) : Token(token_name), candidates(candidates) {};
-    string getName() const override;
-    void error() override;
-};
-
-class TerminalToken : public Token
-{
-private:
-    bool match(const string& Input);
-public:
-    TerminalToken(const string& token_name) : Token(token_name) {};
-    string getName() const override;
-    void error() override;
-
-};
+using logItem = tuple<string, string, string, string>;
 
 class Parser
 {
 private:
     stack<string> tokenStack;
     set<tuple<NonTerminal, string, SelectSet>> selectSets;
-    string inputString;
     set<string> nonTerminalSet;
+    vector<logItem> parserLog;
 
-    void parse();
+    void parse(const string& input);
     string getProduction(const string& token, const string& input);
-    bool isNonterminal(const string& token);
+    bool isNonTerminal(const string& token);
+    string getCurrentStack() noexcept;
+    void fetchLog(const string& stackContent, const string& curInput, const string& seq, const string& select);
 public:
-    Parser(Grammar grammar, const string& input);
+    Parser(Grammar grammar);
+    void emit(const string& input);
+    void printLog() noexcept;
 };
 
 

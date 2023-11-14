@@ -19,8 +19,9 @@ int main()
 
     g.printSelectSets();
 
-    Parser parser = Parser(g, "i=i+i");
-
+    Parser parser = Parser(g);
+    parser.emit("i=(i+i)*i");
+    parser.printLog();
 
     return 0;
 }
