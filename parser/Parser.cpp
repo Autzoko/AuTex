@@ -48,8 +48,8 @@ void Parser::parse() {
     while(true) {
         string cur_top = tokenStack.top();
         char& curChar = inputString[stringIndex];
-        cout << "top: " << cur_top << endl;
-        cout << "char: " << curChar << endl;
+        //cout << "top: " << cur_top << endl;
+        //cout << "char: " << curChar << endl;
         if(!isNonterminal(cur_top)) {
             if(cur_top == string(1, curChar)) {
                 stringIndex++;
@@ -71,9 +71,20 @@ void Parser::parse() {
             throw std::runtime_error("Parser error");
         }
         if(cur_top == "#" && tokenStack.size() == 1) {
+            cout << "Parsing finished." << endl;
             break;
         }
+        cout << "\tToken Stack\t|\tCurrent Input\t|\tSelect Production\t" << endl;
+        stack<string> tmpStack = tokenStack;
+        cout << "\t";
+        while(!tmpStack.empty()) {
+            cout << tmpStack.top();
+            tmpStack.pop();
+        }
+        cout << "|\t" << curChar << endl;
+
     }
+
 }
 
 string Parser::getProduction(const string& token, const string& input) {
