@@ -30,16 +30,17 @@ private:
     map<NonTerminal, FollowSet> followSets;
     set<tuple<NonTerminal, string, SelectSet>> selectSets;
     set<string> nonTerminalSet;
+    string startToken;
 
     bool isNonTerminal(const string& symbol);
-public:
-    explicit Grammar(const string& grammarFile);
     static vector<string> split(const string& input, char delimiter);
     FirstSet calFirst(const string& symbol);
     map<NonTerminal, FollowSet> calFollow();
     void calSelect(const NonTerminal& nonTerminal);
     void calAllSelect();
-
+    string setStartToken(const string& firstLine);
+public:
+    explicit Grammar(const string& grammarFile);
     void printGrammar();
     void printFirstSet();
     void printFollowSets();
@@ -47,7 +48,9 @@ public:
 
     map<NonTerminal, vector<string>> getGrammarRules();
     FirstSet getFirstSetOf(const string& token);
+    set<tuple<NonTerminal, string, SelectSet>> getSelectSets();
     set<string> getNonTerminals();
+    string getStartToken();
 };
 
 #endif //AUTEX_GRAMMAR_H

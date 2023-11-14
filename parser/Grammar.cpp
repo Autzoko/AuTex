@@ -10,8 +10,11 @@ Grammar::Grammar(const string& grammarFile) {
         cerr << "Failed to open the grammar file." << endl;
         exit(1);
     }
-    string line;
-    getline(file, line);
+    string line, firstLine;
+    getline(file, firstLine);
+    startToken = setStartToken(firstLine);
+    cout << "Start token: " << startToken << endl;
+
     while(getline(file, line)) {
         vector<string> substrs = split(line, ':');
         string nonTerminal = substrs[0];
@@ -23,9 +26,9 @@ Grammar::Grammar(const string& grammarFile) {
     for(auto& item : nonTerminalSet) {
         firstSets.insert(make_pair(item, calFirst(item)));
     }
-
+    //printFirstSet();
     followSets = calFollow();
-
+    //printFollowSets();
     calAllSelect();
 }
 
@@ -108,23 +111,63 @@ map<NonTerminal, FollowSet> Grammar::calFollow() {
         exit(1);
     }
     map<NonTerminal, FollowSet> tmpFollow;
-    for(const auto& rule : grammarRules) {
-        for(const string& candidate : rule.second) {
-            for(int i = 0; i < candidate.length(); i++) {
-                char token = candidate[i];
-                if(isNonTerminal(string(1, token))) {
-                    if(i + 1 == candidate.length()) {
-                        tmpFollow[string(1, token)].insert("#");
-                        break;
-                    }
-                    char next = candidate[i + 1];
-                    if(!isNonTerminal(string(1, next))) {
-                        tmpFollow[string(1, token)].insert(string(1, next));
-                    } else {
-                        string _next = string(1, next);
-                        string _token = string(1, token);
-                        set_union(firstSets[_next].begin(), firstSets[_next].end(), tmpFollow[_token].begin(), tmpFollow[_token].end(),
-                                  inserter(tmpFollow[_token], tmpFollow[_token].begin()));
+    bool isUpdated = true;
+    while(isUpdated) {
+        isUpdated = false;
+        for (const auto &rule: grammarRules) {
+            if (rule.first == startToken) {
+                tmpFollow[rule.first].insert("#");
+            }
+            for(const string& production : rule.second) {
+                for(int i = 0; i < production.length(); i++) {
+                    string token = string(1, production[i]);
+                    if(isNonTerminal(token)) {
+                        if (i + 1 == production.length()) {
+                            size_t l = tmpFollow[token].size();
+                            tmpFollow[token].insert("#");
+                            set_union(tmpFollow[rule.first].begin(), tmpFollow[rule.first].end(),
+                                      tmpFollow[token].begin(), tmpFollow[token].end(),
+                                      inserter(tmpFollow[token], tmpFollow[token].begin()));
+                            if(l != tmpFollow[token].size()) {
+                                isUpdated = true;
+                            }
+                            break;
+                        }
+                        string next = string(1, production[i + 1]);
+                        bool nextIsLast = false;
+                        if(i + 2 == production.length()) {
+                            nextIsLast = true;
+                        }
+                        if(isNonTerminal(next)) {
+                            if(firstSets[next].count("e") == 0) {
+                                size_t l = tmpFollow[token].size();
+                                set_union(firstSets[next].begin(), firstSets[next].end(), tmpFollow[token].begin(), tmpFollow[token].end(),
+                                          inserter(tmpFollow[token], tmpFollow[token].begin()));
+                                if(tmpFollow[token].size() != l) {
+                                    isUpdated = true;
+                                }
+                            } else {
+                                size_t l = tmpFollow[token].size();
+                                set<string> tmp = firstSets[next];
+                                tmp.erase("e");
+                                set_union(tmp.begin(), tmp.end(), tmpFollow[token].begin(), tmpFollow[token].end(),
+                                          inserter(tmpFollow[token], tmpFollow[token].begin()));
+                                if(nextIsLast) {
+                                    set_union(tmpFollow[rule.first].begin(), tmpFollow[rule.first].end(),
+                                              tmpFollow[token].begin(), tmpFollow[token].end(),
+                                              inserter(tmpFollow[token], tmpFollow[token].begin()));
+                                }
+                                if(l != tmpFollow[token].size()) {
+                                    isUpdated = true;
+                                }
+                            }
+                        } else {
+                            size_t l = tmpFollow[token].size();
+                            tmpFollow[token].insert(next);
+                            if(l != tmpFollow[token].size()) {
+                                isUpdated = true;
+                            }
+                        }
                     }
                 }
             }
@@ -181,15 +224,37 @@ void Grammar::calAllSelect() {
 
 void Grammar::printSelectSets() {
     cout << "-------------------------------------------------------------" << endl;
-    cout << "Non-terminal\t|\t" << "Production\t|    " << "Select set     |" << endl;
+    cout << "Non-terminal\t|\t" << "Production\t|    " << "Select set     " << endl;
     cout << "=============================================================" << endl;
     for(auto& item : selectSets) {
         cout << "     " << std::get<0>(item) << "\t\t|\t" << std::get<1>(item) << "\t\t|\t";
         for(auto& token : std::get<2>(item)) {
             cout << token << " ";
         }
-        cout << "\t    |" << endl;
+        cout << endl;
         cout << "-------------------------------------------------------------" << endl;
     }
+}
+
+set<tuple<NonTerminal, string, SelectSet>> Grammar::getSelectSets() {
+    return selectSets;
+}
+
+string Grammar::setStartToken(const string &firstLine) {
+    size_t start_pos = firstLine.find('[');
+    size_t end_pos = firstLine.find(']', start_pos);
+    string start_token;
+
+    if(start_pos != string::npos && end_pos != string::npos) {
+        start_token = firstLine.substr(start_pos + 1, end_pos - start_pos - 1);
+    } else {
+        cerr << "Start token not found." << endl;
+        throw std::runtime_error("Parser error");
+    }
+    return start_token;
+}
+
+string Grammar::getStartToken() {
+    return startToken;
 }
 

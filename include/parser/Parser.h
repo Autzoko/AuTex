@@ -21,6 +21,7 @@ protected:
     string token_name;
 
     void getInput(const string& Input);
+
 public:
     Token(string  token_name) : token_name(std::move(token_name)) {};
     virtual string getName() const = 0;
@@ -51,7 +52,16 @@ public:
 class Parser
 {
 private:
-    stack<string> parserStack;
+    stack<string> tokenStack;
+    set<tuple<NonTerminal, string, SelectSet>> selectSets;
+    string inputString;
+    set<string> nonTerminalSet;
+
+    void parse();
+    string getProduction(const string& token, const string& input);
+    bool isNonterminal(const string& token);
+public:
+    Parser(Grammar grammar, const string& input);
 };
 
 
