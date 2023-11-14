@@ -151,22 +151,20 @@ void Grammar::calSelect(const NonTerminal& nonTerminal) {
     SelectSets _selectSet;
     for(auto& production : rules) {
         SelectSet _tmp;
-        for(auto& token : production) {
-            if(!isNonTerminal(string(1, token))) {
-                _tmp.insert(string(1, token));
-            } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 0) {
-                FirstSet _tmpSet = firstSets[string(1, token)];
-                set_union(_tmp.begin(), _tmp.end(), _tmpSet.begin(), _tmpSet.end(), inserter(_tmp, _tmp.begin()));
-            } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 1) {
-                FollowSet _tmpFollow = followSets[nonTerminal];
-                FirstSet _tmpFirst = firstSets[string(1, token)];
-                _tmpFirst.erase("e");
-
-                set_union(_tmpFirst.begin(), _tmpFirst.end(), _tmpFollow.begin(), _tmpFollow.end(), inserter(_tmp, _tmp.begin()));
-            } else {
-                cerr << "Select set error. Mistake found at token \"" << nonTerminal << "\"." << endl;
-                throw std::runtime_error("Parser error.");
-            }
+        auto& token = production[0];
+        if(!isNonTerminal(string(1, token))) {
+            _tmp.insert(string(1, token));
+        } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 0) {
+            FirstSet _tmpSet = firstSets[string(1, token)];
+            set_union(_tmp.begin(), _tmp.end(), _tmpSet.begin(), _tmpSet.end(), inserter(_tmp, _tmp.begin()));
+        } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 1) {
+            FollowSet _tmpFollow = followSets[nonTerminal];
+            FirstSet _tmpFirst = firstSets[string(1, token)];
+            _tmpFirst.erase("e");
+            set_union(_tmpFirst.begin(), _tmpFirst.end(), _tmpFollow.begin(), _tmpFollow.end(), inserter(_tmp, _tmp.begin()));
+        } else {
+            cerr << "Select set error. Mistake found at token \"" << nonTerminal << "\"." << endl;
+            throw std::runtime_error("Parser error.");
         }
        selectSets.insert(SelectSets(nonTerminal, production, _tmp));
     }
