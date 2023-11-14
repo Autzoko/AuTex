@@ -152,8 +152,11 @@ void Grammar::calSelect(const NonTerminal& nonTerminal) {
     for(auto& production : rules) {
         SelectSet _tmp;
         auto& token = production[0];
-        if(!isNonTerminal(string(1, token))) {
+        if(!isNonTerminal(string(1, token)) && token != 'e') {
             _tmp.insert(string(1, token));
+        } else if(!isNonTerminal(string(1, token)) && token == 'e') {
+            FollowSet _tmpFollow = followSets[nonTerminal];
+            set_union(_tmp.begin(), _tmp.end(), _tmpFollow.begin(), _tmpFollow.end(), inserter(_tmp, _tmp.begin()));
         } else if(isNonTerminal(string(1, token)) && firstSets[string(1, token)].count("e") == 0) {
             FirstSet _tmpSet = firstSets[string(1, token)];
             set_union(_tmp.begin(), _tmp.end(), _tmpSet.begin(), _tmpSet.end(), inserter(_tmp, _tmp.begin()));
@@ -178,13 +181,15 @@ void Grammar::calAllSelect() {
 
 void Grammar::printSelectSets() {
     cout << "-------------------------------------------------------------" << endl;
-    cout << "Non-terminal\t|\t" << "Production|\t" << "Select set" << endl;
+    cout << "Non-terminal\t|\t" << "Production\t|    " << "Select set     |" << endl;
+    cout << "=============================================================" << endl;
     for(auto& item : selectSets) {
         cout << "     " << std::get<0>(item) << "\t\t|\t" << std::get<1>(item) << "\t\t|\t";
         for(auto& token : std::get<2>(item)) {
             cout << token << " ";
         }
-        cout << endl;
+        cout << "\t    |" << endl;
+        cout << "-------------------------------------------------------------" << endl;
     }
 }
 
