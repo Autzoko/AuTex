@@ -6,6 +6,9 @@ The main purpose of this project is to implement a simple compiler which can pro
 lexer analysis and grammar analysis.
 
 ## Project Structure
+Until now, this project has already realized the implementation of lexer and parser.
+The header files of such program are all included in **include** folder. And their CPP files
+are all included in **lexer** folder and **parser** folder respectively.
 
 ## Lexer
 
