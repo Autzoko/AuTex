@@ -14,6 +14,7 @@
 #include <sstream>
 #include <algorithm>
 #include <tuple>
+#include <iomanip>
 
 using namespace std;
 
@@ -39,12 +40,15 @@ private:
     void calSelect(const NonTerminal& nonTerminal);
     void calAllSelect();
     string setStartToken(const string& firstLine);
-public:
-    explicit Grammar(const string& grammarFile);
+
     void printGrammar();
     void printFirstSet();
     void printFollowSets();
     void printSelectSets();
+public:
+    explicit Grammar(const string& grammarFile);
+
+    void printInformation() noexcept;
 
     map<NonTerminal, vector<string>> getGrammarRules();
     FirstSet getFirstSetOf(const string& token);

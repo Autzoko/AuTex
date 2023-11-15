@@ -13,7 +13,6 @@ Grammar::Grammar(const string& grammarFile) {
     string line, firstLine;
     getline(file, firstLine);
     startToken = setStartToken(firstLine);
-    cout << "Start token: " << startToken << endl;
 
     while(getline(file, line)) {
         vector<string> substrs = split(line, ':');
@@ -26,9 +25,7 @@ Grammar::Grammar(const string& grammarFile) {
     for(auto& item : nonTerminalSet) {
         firstSets.insert(make_pair(item, calFirst(item)));
     }
-    //printFirstSet();
     followSets = calFollow();
-    //printFollowSets();
     calAllSelect();
 }
 
@@ -51,13 +48,20 @@ vector<string> Grammar::split(const string &input, char delimiter) {
 }
 
 void Grammar::printGrammar() {
-    for(auto & item : grammarRules) {
+    cout << "Grammar Information:" << endl;
+    cout << "Start Token: " << startToken << ";" << endl;
+    cout << "Grammar:" << endl;
+    for(auto& item : grammarRules) {
         cout << item.first << " -> ";
-        for(auto & cand : item.second) {
-            cout << cand << "|";
+        for(auto& production : item.second) {
+            cout << production;
+            if(production != *item.second.end()) {
+                cout << " | ";
+            }
         }
         cout << endl;
     }
+    cout << endl;
 }
 
 FirstSet Grammar::calFirst(const string &symbol) {
@@ -86,23 +90,27 @@ bool Grammar::isNonTerminal(const string &symbol) {
 }
 
 void Grammar::printFirstSet() {
+    cout << "First Set:" << endl;
     for(auto& firstSet : firstSets) {
-        cout << firstSet.first << " : ";
+        cout << firstSet.first << " : { ";
         for(auto& item : firstSet.second) {
             cout << item << ", ";
         }
-        cout << endl;
+        cout << "}" << endl;
     }
+    cout << endl;
 }
 
 void Grammar::printFollowSets() {
+    cout << "Follow Set:" << endl;
     for(auto& followSet : followSets) {
-        cout << followSet.first << " : ";
+        cout << followSet.first << " : { ";
         for(auto& item : followSet.second) {
             cout << item << ", ";
         }
-        cout << endl;
+        cout << "}" << endl;
     }
+    cout << endl;
 }
 
 map<NonTerminal, FollowSet> Grammar::calFollow() {
@@ -223,16 +231,35 @@ void Grammar::calAllSelect() {
 }
 
 void Grammar::printSelectSets() {
-    cout << "-------------------------------------------------------------" << endl;
-    cout << "Non-terminal\t|\t" << "Production\t|    " << "Select set     " << endl;
-    cout << "=============================================================" << endl;
+    cout << "Select Set:" << endl;
+    for(int i = 0; i < 52; i++) {
+        cout << "_";
+    }
+    cout << endl;
+    cout << "|";
+    cout << setw(16) << std::left << "Token" << "|";
+    cout << setw(16) << std::left << "Production" << "|";
+    cout << setw(16) << std::left << "Select Set" << "|";
+    cout << endl;
+    for(int i = 0; i < 52; i++) {
+        cout << "=";
+    }
+    cout << endl;
     for(auto& item : selectSets) {
-        cout << "     " << std::get<0>(item) << "\t\t|\t" << std::get<1>(item) << "\t\t|\t";
+        cout << "|";
+        cout << setw(16) << std::left << std::get<0>(item) << "|";
+        cout << setw(16) << std::left << std::get<1>(item) << "|";
+
+        string tmp;
         for(auto& token : std::get<2>(item)) {
-            cout << token << " ";
+            tmp += (token + " ");
+        }
+        cout << setw(16) << std::left << tmp << "|";
+        cout << endl;
+        for(int i = 0; i < 52; i++) {
+            cout << "-";
         }
         cout << endl;
-        cout << "-------------------------------------------------------------" << endl;
     }
 }
 
@@ -256,5 +283,34 @@ string Grammar::setStartToken(const string &firstLine) {
 
 string Grammar::getStartToken() {
     return startToken;
+}
+
+void Grammar::printInformation() noexcept {
+    cout << "Console: Intermediate Information of Grammar Processing." << endl;
+    cout << "AuTex Grammar:" << endl;
+    for(int i = 0; i < 70; i++) {
+        cout << "=";
+    }
+    cout << endl;
+    printGrammar();
+    for(int i = 0; i < 70; i++) {
+        cout << "=";
+    }
+    cout << endl;
+    printFirstSet();
+    for(int i = 0; i < 70; i++) {
+        cout << "=";
+    }
+    cout << endl;
+    printFollowSets();
+    for(int i = 0; i < 70; i++) {
+        cout << "=";
+    }
+    cout << endl;
+    printSelectSets();
+    for(int i = 0; i < 70; i++) {
+        cout << "=";
+    }
+    cout << endl;
 }
 

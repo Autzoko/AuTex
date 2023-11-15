@@ -11,13 +11,7 @@ int main()
     //lex.lex(false);
     //lex.generate();
     Grammar g = Grammar("../test/source/test.gr");
-    g.printGrammar();
-    cout << "--------------------------------------" << endl;
-    g.printFirstSet();
-    cout << "--------------------------------------" << endl;
-    g.printFollowSets();
-
-    g.printSelectSets();
+    g.printInformation();
 
     Parser parser = Parser(g);
     parser.emit("i=(i+i)*i");
