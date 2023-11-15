@@ -42,11 +42,28 @@ private:
     vector<string> splitInput;
 
     void match(const string& expectedToken);
+    vector<string> splitBySemicolon(const string& input);
+    vector<string> splitBySpace(const string& input);
+    vector<string> split(const string& input);
+    void parse();
 
     void S();
-    void A();
+    void A_prime();
     void E();
     void L();
+    void V();
+    void T();
+    void E_prime();
+    void T_prime();
+    void F();
+    void M();
+    void A();
+
+    void printSplit();
+
+public:
+    RecursiveDescentParser();
+    void emit(const string& input);
 };
 
 

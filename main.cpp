@@ -18,5 +18,8 @@ int main()
     parser.emit("i=(i+i)*i");
     parser.printLog();
 
+    RecursiveDescentParser rdp;
+    rdp.emit("if i * i then i = ( i + i ) * i");
+
     return 0;
 }

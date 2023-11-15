@@ -125,11 +125,11 @@ void Parser::printLog() noexcept {
 
 
 void RecursiveDescentParser::match(const string &expectedToken) {
-    if(currentIndex < splitInput.size() && splitInput[currentIndex] == expectedToken) {
+    if(splitInput[currentIndex] == expectedToken) {
         currentIndex++;
     } else {
         cerr << "Error:" << endl;
-        cerr << "Expected: " << expectedToken << ", but found: " << splitInput[currentIndex] << "." << endl;
+        cerr << "Expected: \"" << expectedToken << "\", but found: \"" << splitInput[currentIndex] << "\"." << endl;
         exit(3);
     }
 }
@@ -154,8 +154,138 @@ void RecursiveDescentParser::S() {
         L();
         match("end");
     } else {
-        A();
+        A_prime();
     }
+}
+
+void RecursiveDescentParser::A_prime() {
+    V();
+    match("=");
+    E();
+}
+
+void RecursiveDescentParser::E() {
+    T();
+    E_prime();
+}
+
+void RecursiveDescentParser::L() {
+    S();
+    while(splitInput[currentIndex] == ";") {
+        match(";");
+        S();
+    }
+}
+
+void RecursiveDescentParser::V() {
+    if(splitInput[currentIndex] == "i") {
+        match("i");
+    }
+}
+
+void RecursiveDescentParser::T() {
+    F();
+    T_prime();
+}
+
+void RecursiveDescentParser::E_prime() {
+    if(splitInput[currentIndex] == "+" || splitInput[currentIndex] == "-") {
+        A();
+        T();
+        E_prime();
+    }
+}
+
+void RecursiveDescentParser::T_prime() {
+    if(splitInput[currentIndex] == "*" || splitInput[currentIndex] == "/") {
+        M();
+        F();
+        T_prime();
+    }
+}
+
+void RecursiveDescentParser::F() {
+    if(splitInput[currentIndex] == "(") {
+        match("(");
+        E();
+        match(")");
+    } else if(splitInput[currentIndex] == "i") {
+        match("i");
+    } else {
+        cerr << "Error: unexpected token." << endl;
+        exit(3);
+    }
+}
+
+void RecursiveDescentParser::M() {
+    if(splitInput[currentIndex] == "*" || splitInput[currentIndex] == "/") {
+        match(splitInput[currentIndex]);
+    }
+}
+
+void RecursiveDescentParser::A() {
+    if(splitInput[currentIndex] == "+" || splitInput[currentIndex] == "-") {
+        match(splitInput[currentIndex]);
+    }
+}
+
+vector<string> RecursiveDescentParser::split(const string &input) {
+    vector<string> substrings = splitBySemicolon(input);
+    vector<string> tokens;
+    for(const auto& substring : substrings) {
+        vector<string> splited = splitBySpace(substring);
+        for(const auto& token : splited) {
+            tokens.push_back(token);
+        }
+    }
+    return tokens;
+}
+
+RecursiveDescentParser::RecursiveDescentParser() {
+    currentIndex = 0;
+}
+
+void RecursiveDescentParser::emit(const string &input) {
+    splitInput = split(input);
+    printSplit();
+    parse();
+    cout << "Parse finished." << endl;
+}
+
+void RecursiveDescentParser::parse() {
+    currentIndex = 0;
+    if(!splitInput.empty()) {
+        splitInput.clear();
+    }
+    S();
+}
+
+void RecursiveDescentParser::printSplit() {
+    for(auto& item : splitInput) {
+        cout << item << endl;
+    }
+}
+
+vector<string> RecursiveDescentParser::splitBySemicolon(const string &input) {
+    vector<string> result;
+    istringstream iss(input);
+    string token;
+
+    while(getline(iss, token, ';')) {
+        result.push_back(token);
+    }
+    return result;
+}
+
+vector<string> RecursiveDescentParser::splitBySpace(const string &input) {
+    vector<string> result;
+    istringstream iss(input);
+    string token;
+
+    while(iss >> token) {
+        result.push_back(token);
+    }
+    return result;
 }
 
 
