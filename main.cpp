@@ -10,6 +10,7 @@ int main()
     //lexer lex("../test/source/test.ax", "../test/target/_out.tgt");
     //lex.lex(false);
     //lex.generate();
+
     Grammar g = Grammar("../test/source/test.gr");
     g.printInformation();
 
