@@ -30,9 +30,23 @@ private:
     string getCurrentStack() noexcept;
     void fetchLog(const string& stackContent, const string& curInput, const string& seq, const string& select);
 public:
-    Parser(Grammar grammar);
+    explicit Parser(Grammar grammar);
     void emit(const string& input);
     void printLog() noexcept;
+};
+
+class RecursiveDescentParser
+{
+private:
+    int currentIndex;
+    vector<string> splitInput;
+
+    void match(const string& expectedToken);
+
+    void S();
+    void A();
+    void E();
+    void L();
 };
 
 

@@ -122,3 +122,40 @@ void Parser::printLog() noexcept {
         cout << endl;
     }
 }
+
+
+void RecursiveDescentParser::match(const string &expectedToken) {
+    if(currentIndex < splitInput.size() && splitInput[currentIndex] == expectedToken) {
+        currentIndex++;
+    } else {
+        cerr << "Error:" << endl;
+        cerr << "Expected: " << expectedToken << ", but found: " << splitInput[currentIndex] << "." << endl;
+        exit(3);
+    }
+}
+
+void RecursiveDescentParser::S() {
+    if(splitInput[currentIndex] == "if") {
+        match("if");
+        E();
+        match("then");
+        S();
+        if(splitInput[currentIndex] == "else") {
+            match("else");
+            S();
+        }
+    } else if(splitInput[currentIndex] == "while") {
+        match("while");
+        E();
+        match("do");
+        S();
+    } else if(splitInput[currentIndex] == "begin") {
+        match("begin");
+        L();
+        match("end");
+    } else {
+        A();
+    }
+}
+
+

@@ -1,0 +1,12 @@
+G[S]
+S:if E then S,while E do S,begin L end,A
+L:S
+A:V=E
+E:TR
+R:ATR,e
+T:FP
+P:MFP,e
+F:(E),i
+A:+,-
+M:*,/
+V:i
