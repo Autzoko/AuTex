@@ -15,11 +15,11 @@ int main()
     g.printInformation();
 
     Parser parser = Parser(g);
-    parser.emit("i=(i+i)*i");
+    parser.emit("i=(i+i*i");
     parser.printLog();
 
-    RecursiveDescentParser rdp;
-    rdp.emit("if i * i then i = ( i + i ) * i");
+    //RecursiveDescentParser rdp;
+    //rdp.emit("whlie i + i do i = i / i + i");
 
     return 0;
 }
