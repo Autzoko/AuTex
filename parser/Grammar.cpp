@@ -22,11 +22,7 @@ Grammar::Grammar(const string& grammarFile) {
         grammarRules.insert(make_pair(nonTerminal, candidates));
     }
 
-    for(auto& item : nonTerminalSet) {
-        firstSets.insert(make_pair(item, calFirst(item)));
-    }
-    followSets = calFollow();
-    calAllSelect();
+
 }
 
 vector<string> Grammar::split(const string &input, char delimiter) {
@@ -68,6 +64,7 @@ FirstSet Grammar::calFirst(const string &symbol) {
     FirstSet firstSet;
     const auto& rule = grammarRules[symbol];
     for(const string& production : rule) {
+        cout << "!";
         for(char c : production) {
             if(isNonTerminal(string(1, c))) {
                 const FirstSet& firstOfNonTerminal = calFirst(string(1, c));
@@ -312,5 +309,13 @@ void Grammar::printInformation() noexcept {
         cout << "=";
     }
     cout << endl;
+}
+
+void Grammar::emit() {
+    for(auto& item : nonTerminalSet) {
+        firstSets.insert(make_pair(item, calFirst(item)));
+    }
+    followSets = calFollow();
+    calAllSelect();
 }
 

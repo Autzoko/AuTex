@@ -4,6 +4,7 @@
 #include "include/lexer/lexer.h"
 #include "include/parser/Grammar.h"
 #include "include/parser/Parser.h"
+#include "include/parser/Operator.h"
 
 int main()
 {
@@ -11,15 +12,19 @@ int main()
     //lex.lex(false);
     //lex.generate();
 
-    Grammar g = Grammar("../test/source/test.gr");
+    Grammar g = Grammar("../test/source/opr.gr");
     g.printInformation();
 
-    Parser parser = Parser(g);
-    parser.emit("i=(i+i*i");
-    parser.printLog();
+    //Parser parser = Parser(g);
+    //parser.emit("i=(i+i)");
+    //parser.printLog();
 
     //RecursiveDescentParser rdp;
     //rdp.emit("whlie i + i do i = i / i + i");
+
+    OperatorGrammar operatorGrammar = OperatorGrammar(g);
+    operatorGrammar.emit();
+    operatorGrammar.printInfo();
 
     return 0;
 }

@@ -47,6 +47,7 @@ private:
     void printSelectSets();
 public:
     explicit Grammar(const string& grammarFile);
+    void emit();
 
     void printInformation() noexcept;
 

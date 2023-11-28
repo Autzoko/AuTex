@@ -10,7 +10,7 @@
 class OperatorGrammar
 {
 private:
-    map<NonTerminal, set<string>> grammarRules;
+    map<NonTerminal, vector<string>> grammarRules;
     map<NonTerminal, set<string>> FirstVT;
     map<NonTerminal, set<string>> LastVT;
     set<string> NonTerminals;
@@ -22,10 +22,16 @@ private:
     bool isOperatorFirstGrammar();
 
     void calEq();
-    map<NonTerminal, vector<string>> calFirstVT();
+    void calFirstVT();
+    void printFirstVT();
+    void calLastVT();
+    void printLastVT();
+
 
 public:
     explicit OperatorGrammar(Grammar grammar);
+    void emit();
+    void printInfo();
 };
 
 #endif //AUTEX_OPERATOR_H

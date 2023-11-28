@@ -51,21 +51,130 @@ void OperatorGrammar::calEq() {
     }
 }
 
-map<NonTerminal, vector<string>> OperatorGrammar::calFirstVT() {
+void OperatorGrammar::calFirstVT() {
     bool isUpdate = true;
     while(isUpdate) {
-        for(auto& item : grammarRules) {
-            for(auto& production : item.second) {
-                if(isNonterminal(string(1, production[0]))) {
-                    if(!FirstVT[string(1, production[0])].empty()) {
-                        string tmp = string(1, production[0]);
-
+        isUpdate = false;
+        for(const auto& item : grammarRules) {
+            for(const auto& production : item.second) {
+                if(!isNonterminal(string(1, production[0]))) {
+                    int len = FirstVT[item.first].size();
+                    FirstVT[item.first].insert(string(1, production[0]));
+                    if(len != FirstVT[item.first].size()) {
+                        isUpdate = true;
                     }
                 } else {
-                    FirstVT[item.first].insert(string(1, production[0]));
-                    isUpdate = true;
+                    if(production.length() == 1) {
+                        string nt = string(1, production[0]);
+                        int len = FirstVT[item.first].size();
+                        if(!FirstVT[nt].empty()) {
+                            set_union(FirstVT[item.first].begin(), FirstVT[item.first].end(), FirstVT[nt].begin(),
+                                      FirstVT[nt].end(),
+                                      inserter(FirstVT[item.first], FirstVT[item.first].begin()));
+                        }
+                        if(len != FirstVT[item.first].size()) {
+                            isUpdate = true;
+                        }
+                    } else {
+                        string nt = string(1, production[0]);
+                        string t = string(1, production[1]);
+                        int len = FirstVT[item.first].size();
+                        FirstVT[item.first].insert(t);
+                        if (!FirstVT[nt].empty()) {
+                            set_union(FirstVT[item.first].begin(), FirstVT[item.first].end(), FirstVT[nt].begin(),
+                                      FirstVT[nt].end(),
+                                      inserter(FirstVT[item.first], FirstVT[item.first].begin()));
+                        }
+                        if (len != FirstVT[item.first].size()) {
+                            isUpdate = true;
+                        }
+                    }
                 }
             }
         }
     }
+    for(auto& item : FirstVT) {
+        item.second.erase("");
+    }
+}
+
+void OperatorGrammar::printFirstVT() {
+    for(const auto& item : FirstVT) {
+        cout << item.first << ": {";
+        for(const auto& token : item.second) {
+            cout << token << ", ";
+        }
+        cout << "}" << endl;
+    }
+    cout << endl;
+}
+
+void OperatorGrammar::calLastVT() {
+    bool isUpdate = true;
+    while(isUpdate) {
+        isUpdate = false;
+        for(const auto& item : grammarRules) {
+            for(const auto& production : item.second) {
+                if(!isNonterminal(string(1, production[production.length() - 1]))) {
+                    int len = LastVT[item.first].size();
+                    string t = string(1, production[production.length() - 1]);
+                    LastVT[item.first].insert(t);
+                    if(len != LastVT[item.first].size()) {
+                        isUpdate = true;
+                    }
+                } else {
+                    if(production.length() == 1) {
+                        string nt = string(1, production[production.size() - 1]);
+                        int len = LastVT[item.first].size();
+                        if(!LastVT[nt].empty()) {
+                            set_union(LastVT[item.first].begin(), LastVT[item.first].end(), LastVT[nt].begin(),
+                                      LastVT[nt].end(),
+                                      inserter(LastVT[item.first], LastVT[item.first].begin()));
+                        }
+                        if(len != LastVT[item.first].size()) {
+                            isUpdate = true;
+                        }
+                    } else {
+                        string nt = string(1, production[production.size() - 1]);
+                        string t = string(1, production[production.size() - 2]);
+                        int len = LastVT[item.first].size();
+                        LastVT[item.first].insert(t);
+                        if (!LastVT[nt].empty()) {
+                            set_union(LastVT[item.first].begin(), LastVT[item.first].end(), LastVT[nt].begin(),
+                                      LastVT[nt].end(),
+                                      inserter(LastVT[item.first], LastVT[item.first].begin()));
+                        }
+                        if (len != LastVT[item.first].size()) {
+                            isUpdate = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for(auto item : LastVT) {
+        item.second.erase("");
+    }
+}
+
+void OperatorGrammar::printLastVT() {
+    for(const auto& item : LastVT) {
+        cout << item.first << ": {";
+        for(const auto& token : item.second) {
+            cout << token << ", ";
+        }
+        cout << "}" << endl;
+    }
+    cout << endl;
+}
+
+void OperatorGrammar::emit() {
+    calFirstVT();
+    calLastVT();
+}
+
+void OperatorGrammar::printInfo() {
+    printFirstVT();
+    cout << "---" << endl;
+    printLastVT();
 }
