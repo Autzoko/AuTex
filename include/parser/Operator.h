@@ -76,7 +76,7 @@ private:
     bool match(const string& str);
     string getReductionResultOf(const string& production);
     void reduction();
-    string getFirstNonTerminalInTokenStack();
+    string getFirstTerminalInTokenStack();
     void fetchLog(const string& stackContent, const string& input, const string& operation);
 
     //for debug

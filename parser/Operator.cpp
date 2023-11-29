@@ -360,7 +360,7 @@ void OperatorPrecedentParser::parse(const string &input) {
             reduction();
             continue;
         }
-        string firstNT = getFirstNonTerminalInTokenStack();
+        string firstNT = getFirstTerminalInTokenStack();
         if(precedenceMap[make_pair(firstNT, inputStack.top())] == -1) {
             string content = getCurrentStack(tokenStack);
             std::reverse(content.begin(), content.end());
@@ -379,7 +379,7 @@ void OperatorPrecedentParser::parse(const string &input) {
                 std::reverse(content.begin(), content.end());
                 fetchLog(content, getCurrentStack(inputStack), "reduce");
                 reduction();
-                firstNT = getFirstNonTerminalInTokenStack();
+                firstNT = getFirstTerminalInTokenStack();
             }
         } else {
             cerr << "Parser error, token does not follow any precedence relation." << endl;
@@ -453,7 +453,7 @@ void OperatorPrecedentParser::reduction() {
     tokenStack.push(reductionResult);
 }
 
-string OperatorPrecedentParser::getFirstNonTerminalInTokenStack() {
+string OperatorPrecedentParser::getFirstTerminalInTokenStack() {
     string content = getCurrentStack(tokenStack);
     for(char i : content) {
         if(!isNonterminal(string(1, i))) {
