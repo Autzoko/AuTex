@@ -28,6 +28,7 @@ int main()
 
     OperatorPrecedentParser operatorPrecedentParser = OperatorPrecedentParser(operatorGrammar);
     operatorPrecedentParser.emit("i*i+i");
+    //still has bugs when add "(" and ")"
     operatorPrecedentParser.printLog();
 
     return 0;
