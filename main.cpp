@@ -26,5 +26,9 @@ int main()
     operatorGrammar.emit();
     operatorGrammar.printInfo();
 
+    OperatorPrecedentParser operatorPrecedentParser = OperatorPrecedentParser(operatorGrammar);
+    operatorPrecedentParser.emit("i*i+i");
+    operatorPrecedentParser.printLog();
+
     return 0;
 }

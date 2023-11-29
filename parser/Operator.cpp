@@ -8,6 +8,7 @@ OperatorGrammar::OperatorGrammar(Grammar grammar) {
     grammarRules = grammar.getGrammarRules();
     NonTerminals = grammar.getNonTerminals();
     Terminals = getTernimals();
+    startToken = grammar.getStartToken();
 }
 
 bool OperatorGrammar::isNonterminal(const string &token) {
@@ -182,6 +183,8 @@ void OperatorGrammar::emit() {
     calEq();
     calLT();
     calGT();
+
+    setPrecedenceMap();
 }
 
 void OperatorGrammar::printInfo() {
@@ -250,7 +253,7 @@ void OperatorGrammar::printGT() {
 }
 
 void OperatorGrammar::printTable() {
-    for(int i = 0; i < 7 * Terminals.size(); i++) {
+    for(int i = 0; i < 7 * Terminals.size() - 1; i++) {
         cout << "_";
     }
     cout << endl;
@@ -259,7 +262,7 @@ void OperatorGrammar::printTable() {
         cout << setw(5) << std::left << col_head << "|";
     }
     cout << endl;
-    for(int i = 0; i < 7 * Terminals.size(); i++) {
+    for(int i = 0; i < 7 * Terminals.size() - 1; i++) {
         cout << "=";
     }
     cout << endl;
@@ -269,7 +272,7 @@ void OperatorGrammar::printTable() {
             cout << setw(5) << std::left << checkPrecedenceOf(row, col) << "|";
         }
         cout << endl;
-        for(int i = 0; i < 7 * Terminals.size(); i++) {
+        for(int i = 0; i < 7 * Terminals.size() - 1; i++) {
             cout << "-";
         }
         cout << endl;
@@ -302,4 +305,201 @@ set<string> OperatorGrammar::getTernimals() {
     return terminals;
 }
 
+void OperatorGrammar::setPrecedenceMap() {
+    for(const auto& a : Terminals) {
+        for(const auto& b : Terminals) {
+            if(checkPrecedenceOf(a, b) == "<") {
+                precedenceMap[make_pair(a, b)] = OPR_LT;
+            } else if(checkPrecedenceOf(a, b) == "=") {
+                precedenceMap[make_pair(a, b)] = OPR_EQ;
+            } else if(checkPrecedenceOf(a, b) == ">") {
+                precedenceMap[make_pair(a, b)] = OPR_GT;
+            } else {
+                continue;
+            }
+        }
+    }
+}
 
+map<pair<string, string>, int> OperatorGrammar::getPrecedenceMap() {
+    return precedenceMap;
+}
+
+set<string> OperatorGrammar::getNonterminals() {
+    return NonTerminals;
+}
+
+map<NonTerminal, vector<string>> OperatorGrammar::getGrammarRules() {
+    return grammarRules;
+}
+
+string OperatorGrammar::getStartToken() {
+    return startToken;
+}
+
+OperatorPrecedentParser::OperatorPrecedentParser(OperatorGrammar operatorGrammar) {
+    precedenceMap = operatorGrammar.getPrecedenceMap();
+    tokenStack.emplace("#");
+    nonTerminal = operatorGrammar.getNonterminals();
+    grammarRules = operatorGrammar.getGrammarRules();
+    startToken = operatorGrammar.getStartToken();
+}
+
+void OperatorPrecedentParser::parse(const string &input) {
+    string tmp = input + "#";
+    stack<string> inputStack;
+    std::reverse(tmp.begin(), tmp.end());
+    for(char c : tmp) {
+        inputStack.emplace(1, c);
+    }
+    while(tokenStack.top() != startToken) {
+        if(inputStack.empty()) {
+            string content = getCurrentStack(tokenStack);
+            std::reverse(content.begin(), content.end());
+            fetchLog(content, "", "accept");
+            reduction();
+            continue;
+        }
+        string firstNT = getFirstNonTerminalInTokenStack();
+        if(precedenceMap[make_pair(firstNT, inputStack.top())] == -1) {
+            string content = getCurrentStack(tokenStack);
+            std::reverse(content.begin(), content.end());
+            fetchLog(content, getCurrentStack(inputStack), "move in");
+            tokenStack.push(inputStack.top());
+            inputStack.pop();
+        } else if(precedenceMap[make_pair(firstNT, inputStack.top())] == 0) {
+            string content = getCurrentStack(tokenStack);
+            std::reverse(content.begin(), content.end());
+            fetchLog(content, getCurrentStack(inputStack), "move in");
+            tokenStack.push(inputStack.top());
+            inputStack.pop();
+        } else if(precedenceMap[make_pair(firstNT, inputStack.top())] == 1) {
+            while(precedenceMap[make_pair(firstNT, inputStack.top())] == 1) {
+                string content = getCurrentStack(tokenStack);
+                std::reverse(content.begin(), content.end());
+                fetchLog(content, getCurrentStack(inputStack), "reduce");
+                reduction();
+                firstNT = getFirstNonTerminalInTokenStack();
+            }
+        } else {
+            cerr << "Parser error, token does not follow any precedence relation." << endl;
+            exit(3);
+        }
+    }
+
+
+
+}
+
+string OperatorPrecedentParser::getCurrentStack(const stack<string> &s) {
+    stack<string> _s = s;
+    string ret;
+    while(!_s.empty()) {
+        ret += _s.top();
+        _s.pop();
+    }
+    return ret;
+}
+
+bool OperatorPrecedentParser::isNonterminal(const string &token) {
+    if(nonTerminal.count(token) != 0) return true;
+    else return false;
+}
+
+string OperatorPrecedentParser::getMostLeftDerivation(const string &str) {
+    string sentence;
+    string result;
+    for(int i = 0; i < str.length(); i++) {
+        sentence += str[i];
+        if(match(sentence)) {
+            result = sentence;
+        }
+    }
+    return result;
+}
+
+bool OperatorPrecedentParser::match(const string &str) {
+    for(const auto& item : grammarRules) {
+        for(const auto& production : item.second) {
+            if(str == production) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+string OperatorPrecedentParser::getReductionResultOf(const string &production) {
+    for(const auto& item : grammarRules) {
+        for(const auto& p : item.second) {
+            if(p == production) {
+                return item.first;
+            }
+        }
+    }
+    cerr << "Reduction error: unrecognized production." << endl;
+    cerr << "Found error at: " << production << "." << endl;
+    exit(3);
+}
+
+void OperatorPrecedentParser::reduction() {
+    string tokenStackContent = getCurrentStack(tokenStack);
+    string mld = getMostLeftDerivation(tokenStackContent);
+    size_t lenOfMLD = mld.length();
+    string reductionResult = getReductionResultOf(mld);
+    while(lenOfMLD--) {
+        tokenStack.pop();
+    }
+    tokenStack.push(reductionResult);
+}
+
+string OperatorPrecedentParser::getFirstNonTerminalInTokenStack() {
+    string content = getCurrentStack(tokenStack);
+    for(char i : content) {
+        if(!isNonterminal(string(1, i))) {
+            string ret = string(1, i);
+            return ret;
+        }
+    }
+    cerr << "Parser error: can not found terminal." << endl;
+    exit(3);
+}
+
+void OperatorPrecedentParser::emit(const string &input) {
+    parse(input);
+    cout << "Parse finished." << endl;
+}
+
+void OperatorPrecedentParser::printCurrentStack() {
+    string content = getCurrentStack(tokenStack);
+    std::reverse(content.begin(), content.end());
+    cout << content << endl;
+}
+
+void OperatorPrecedentParser::fetchLog(const string &stackContent, const string &input, const string &operation) {
+    oprLogItem item = oprLogItem(stackContent, input, operation);
+    parserLog.push_back(item);
+}
+
+void OperatorPrecedentParser::printLog() {
+    for(int i = 0; i < 22 * 3 - 2; i++) {
+        cout << "_";
+    }
+    cout << endl;
+    cout << "|" << setw(20) << std::left << "Stack" << "|";
+    cout << setw(20) << std::left << "Input" << "|";
+    cout << setw(20) << std::left << "Operation" << "|" << endl;
+    for(int i = 0; i < 22 * 3 - 2; i++) {
+        cout << "=";
+    }
+    cout << endl;
+    for(const auto& item : parserLog) {
+        cout << "|" << setw(20) << std::left << std::get<0>(item) << "|";
+        cout << setw(20) << std::left << std::get<1>(item) << "|";
+        cout << setw(20) << std::left << std::get<2>(item) << "|" << endl;
+        for(int i = 0; i < 22 * 3 - 2; i++) {
+            cout << "-";
+        }
+        cout << endl;
+    }
+}
