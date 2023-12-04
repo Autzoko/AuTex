@@ -14,15 +14,32 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar) {
     }
 }
 
-void SimpleLRGrammar::generateClosureSets() {
-
-}
-
 bool SimpleLRGrammar::isNonTerminal(const string &token) {
     if(nonTerminals.count(token) != 0) return true;
     else return false;
 }
 
-vector<map<NonTerminal, string>> SimpleLRGrammar::getMovingInItemsOf(const string &nonTerminal) {
-    return vector<map<NonTerminal, string>>();
+vector<tuple<NonTerminal, string>> SimpleLRGrammar::getMovingInOf(const string &nonTerminal) {
+    vector<string> productions = grammarRules[nonTerminal];
+    vector<tuple<NonTerminal, string>> ret;
+    ret.reserve(productions.size());
+    for(const auto& production : productions) {
+        ret.emplace_back(nonTerminal, production);
+    }
+    return ret;
+}
+
+void SimpleLRGrammar::generateClosureSets() {
+
+}
+
+SLR_CLOSURE SimpleLRGrammar::calClosure(const string &nonTerminal, const string &production, const int& pos, const int &id) {
+    SLR_CLOSURE ret;
+    ret.emplace_back(nonTerminal, production, pos);
+    if(isNonTerminal(string(1, production[pos]))) {
+        vector<tuple<NonTerminal, string>> tmp = getMovingInOf(string(1, production[pos]));
+        for(const auto& item : tmp) {
+            ret.emplace_back(std::get<0>(item), std::get<1>(item), 0);
+        }
+    }
 }

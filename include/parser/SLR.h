@@ -7,11 +7,7 @@
 
 #include "Grammar.h"
 
-typedef struct SLR_closure{
-    int closureID;
-    vector<map<NonTerminal, string>> item;
-    vector<int> pointPOS;
-}SLR_CLOSURE;
+using SLR_CLOSURE = vector<tuple<NonTerminal, string, int>>;
 
 class SimpleLRGrammar
 {
@@ -24,7 +20,8 @@ private:
 
     void generateClosureSets();
     bool isNonTerminal(const string& token);
-    vector<map<NonTerminal, string>> getMovingInItemsOf(const string& nonTerminal);
+    vector<tuple<NonTerminal, string>> getMovingInOf(const string& nonTerminal);
+    SLR_CLOSURE calClosure(const string& nonTerminal, const string& production, const int& pos, const int& id);
 public:
     explicit SimpleLRGrammar(Grammar grammar);
 };
