@@ -319,3 +319,7 @@ void Grammar::emit() {
     calAllSelect();
 }
 
+FollowSet Grammar::getFollowSetOf(const string &token) {
+    return followSets[token];
+}
+

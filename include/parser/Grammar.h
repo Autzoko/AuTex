@@ -53,6 +53,7 @@ public:
 
     map<NonTerminal, vector<string>> getGrammarRules();
     FirstSet getFirstSetOf(const string& token);
+    FollowSet getFollowSetOf(const string& token);
     set<tuple<NonTerminal, string, SelectSet>> getSelectSets();
     set<string> getNonTerminals();
     string getStartToken();
