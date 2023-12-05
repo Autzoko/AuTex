@@ -30,16 +30,36 @@ vector<tuple<NonTerminal, string>> SimpleLRGrammar::getMovingInOf(const string &
 }
 
 void SimpleLRGrammar::generateClosureSets() {
+    SLR_CLOSURE firstClosure = calClosure(startToken, *grammarRules[startToken].begin(), 0);
+    closures.push_back(firstClosure);
 
 }
 
-SLR_CLOSURE SimpleLRGrammar::calClosure(const string &nonTerminal, const string &production, const int& pos, const int &id) {
+SLR_CLOSURE SimpleLRGrammar::calClosure(const string &nonTerminal, const string &production, const int& pos) {
     SLR_CLOSURE ret;
     ret.emplace_back(nonTerminal, production, pos);
-    if(isNonTerminal(string(1, production[pos]))) {
-        vector<tuple<NonTerminal, string>> tmp = getMovingInOf(string(1, production[pos]));
-        for(const auto& item : tmp) {
-            ret.emplace_back(std::get<0>(item), std::get<1>(item), 0);
+    unsigned long long closureLen = 1;
+    unsigned long long currentCheckIndex = 0;
+    for(;currentCheckIndex < closureLen; currentCheckIndex++) {
+        const auto& current = ret[currentCheckIndex];
+        if(isNonTerminal(string(1, std::get<1>(current)[std::get<2>(current)]))) {
+            auto tmp = getMovingInOf(string(1, std::get<1>(current)[std::get<2>(current)]));
+            for(const auto& item : tmp) {
+                ret.emplace_back(std::get<0>(item), std::get<1>(item), 0);
+            }
+            closureLen += tmp.size();
         }
+    }
+    return ret;
+}
+
+vector<SLR_CLOSURE> SimpleLRGrammar::calNextClosuresOf(SLR_CLOSURE c) {
+    vector<SLR_CLOSURE> ret;
+    for(const auto& item : c) {
+        NonTerminal nt = std::get<0>(item);
+        string pd = std::get<1>(item);
+        int pos = std::get<2>(item);
+        SLR_CLOSURE tmp = calClosure(nt, pd, pos + 1);
+        ret.push_back(tmp);
     }
 }

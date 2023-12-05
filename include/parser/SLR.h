@@ -21,7 +21,8 @@ private:
     void generateClosureSets();
     bool isNonTerminal(const string& token);
     vector<tuple<NonTerminal, string>> getMovingInOf(const string& nonTerminal);
-    SLR_CLOSURE calClosure(const string& nonTerminal, const string& production, const int& pos, const int& id);
+    SLR_CLOSURE calClosure(const string& nonTerminal, const string& production, const int& pos);
+    vector<SLR_CLOSURE> calNextClosuresOf(SLR_CLOSURE c);
 public:
     explicit SimpleLRGrammar(Grammar grammar);
 };
