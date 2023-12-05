@@ -32,7 +32,12 @@ vector<tuple<NonTerminal, string>> SimpleLRGrammar::getMovingInOf(const string &
 void SimpleLRGrammar::generateClosureSets() {
     SLR_CLOSURE firstClosure = calClosure(startToken, *grammarRules[startToken].begin(), 0);
     closures.push_back(firstClosure);
-
+    for(const auto& closure : closures) {
+        auto tmp = calNextClosuresOf(closure);
+        for(const auto& item : tmp) {
+            closures.push_back(item);
+        }
+    }
 }
 
 SLR_CLOSURE SimpleLRGrammar::calClosure(const string &nonTerminal, const string &production, const int& pos) {
@@ -62,4 +67,5 @@ vector<SLR_CLOSURE> SimpleLRGrammar::calNextClosuresOf(SLR_CLOSURE c) {
         SLR_CLOSURE tmp = calClosure(nt, pd, pos + 1);
         ret.push_back(tmp);
     }
+    return ret;
 }
