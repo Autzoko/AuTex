@@ -7,65 +7,67 @@
 
 SimpleLRGrammar::SimpleLRGrammar(Grammar grammar) {
     grammarRules = grammar.getGrammarRules();
+    for(const auto& item : grammarRules) {
+        for(const auto& production : item.second) {
+            rules.emplace_back(item.first, production);
+        }
+    }
+    nonTerminalSet = grammar.getNonTerminals();
     startToken = grammar.getStartToken();
-    nonTerminals = grammar.getNonTerminals();
-    for(const auto& token : nonTerminals) {
-        followSets.insert(make_pair(token, grammar.getFollowSetOf(token)));
+}
+
+Closure SimpleLRGrammar::closure(const LR_Item &item) {
+    Closure result;
+    result.push_back(item);
+    bool isUpdated = true;
+    for(const LR_Item& current : result) {
+        string dotTokenOfCurrentItem = string(1, current.rule.body[current.dotPosition]);
+        if(isNonTerminal(dotTokenOfCurrentItem)) {
+            closureAdd(findRuleOf(dotTokenOfCurrentItem), result);
+        }
     }
 }
 
 bool SimpleLRGrammar::isNonTerminal(const string &token) {
-    if(nonTerminals.count(token) != 0) return true;
+    if(nonTerminalSet.count(token) != 0) return true;
     else return false;
 }
 
-vector<tuple<NonTerminal, string>> SimpleLRGrammar::getMovingInOf(const string &nonTerminal) {
-    vector<string> productions = grammarRules[nonTerminal];
-    vector<tuple<NonTerminal, string>> ret;
-    ret.reserve(productions.size());
-    for(const auto& production : productions) {
-        ret.emplace_back(nonTerminal, production);
-    }
-    return ret;
-}
-
-void SimpleLRGrammar::generateClosureSets() {
-    SLR_CLOSURE firstClosure = calClosure(startToken, *grammarRules[startToken].begin(), 0);
-    closures.push_back(firstClosure);
-    for(const auto& closure : closures) {
-        auto tmp = calNextClosuresOf(closure);
-        for(const auto& item : tmp) {
-            closures.push_back(item);
+vector<Rule> SimpleLRGrammar::findRuleOf(const string &head) {
+    vector<Rule> result;
+    for(const auto& item : rules) {
+        if(item.head == head) {
+            result.push_back(item);
         }
     }
+    return result;
 }
 
-SLR_CLOSURE SimpleLRGrammar::calClosure(const string &nonTerminal, const string &production, const int& pos) {
-    SLR_CLOSURE ret;
-    ret.emplace_back(nonTerminal, production, pos);
-    unsigned long long closureLen = 1;
-    unsigned long long currentCheckIndex = 0;
-    for(;currentCheckIndex < closureLen; currentCheckIndex++) {
-        const auto& current = ret[currentCheckIndex];
-        if(isNonTerminal(string(1, std::get<1>(current)[std::get<2>(current)]))) {
-            auto tmp = getMovingInOf(string(1, std::get<1>(current)[std::get<2>(current)]));
-            for(const auto& item : tmp) {
-                ret.emplace_back(std::get<0>(item), std::get<1>(item), 0);
-            }
-            closureLen += tmp.size();
-        }
+void SimpleLRGrammar::closureAdd(const vector<Rule> &forAdds, Closure& c) {
+    for(const auto& item : forAdds) {
+        c.emplace_back(item, 0);
     }
-    return ret;
 }
 
-vector<SLR_CLOSURE> SimpleLRGrammar::calNextClosuresOf(SLR_CLOSURE c) {
-    vector<SLR_CLOSURE> ret;
+void SimpleLRGrammar::emit() {
+    LR_Item firstOne = LR_Item(findRuleOf(startToken)[0], 0);
+    Closure c = closure(firstOne);
+    printClosure(c);
+}
+
+void SimpleLRGrammar::printClosure(const Closure &c) {
     for(const auto& item : c) {
-        NonTerminal nt = std::get<0>(item);
-        string pd = std::get<1>(item);
-        int pos = std::get<2>(item);
-        SLR_CLOSURE tmp = calClosure(nt, pd, pos + 1);
-        ret.push_back(tmp);
+        cout << item.rule.head << " -> ";
+        for(int i = 0; i < item.rule.body.size(); i++) {
+            if(i == item.dotPosition) {
+                cout << "•";
+            }
+            cout << item.rule.body[i];
+        }
+        cout << endl;
     }
-    return ret;
 }
+
+
+
+

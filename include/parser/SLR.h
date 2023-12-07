@@ -5,26 +5,55 @@
 #ifndef AUTEX_SLR_H
 #define AUTEX_SLR_H
 
+#include <utility>
+
 #include "Grammar.h"
 
-using SLR_CLOSURE = vector<tuple<NonTerminal, string, int>>;
+struct Rule {
+    string head;
+    string body;
+    Rule(string h, string b) : head(std::move(h)), body(std::move(b)) {}
+};
+
+struct LR_Item {
+    Rule rule;
+    int dotPosition;
+    set<string> lookahead;
+
+    LR_Item(Rule r, int dPos) : rule(std::move(r)), dotPosition(dPos) {}
+    bool operator==(const LR_Item& other) const {
+        return  rule.head == other.rule.head &&
+                rule.body == other.rule.body &&
+                dotPosition == other.dotPosition &&
+                lookahead == other.lookahead;
+    }
+};
+
+using Closure = vector<LR_Item>;
+using ItemSet = vector<Closure>;
+
+using ActionTable = map<pair<int, string>, string>;
+using GotoTable = map<pair<int, string>, int>;
 
 class SimpleLRGrammar
 {
 private:
-    map<NonTerminal, vector<string>> grammarRules;
-    string startToken;
-    set<string> nonTerminals;
-    map<NonTerminal, FollowSet> followSets;
-    vector<SLR_CLOSURE> closures;
 
-    void generateClosureSets();
+    map<NonTerminal, vector<string>> grammarRules;
+    vector<Rule> rules;
+    ItemSet itemSet;
+    set<string> nonTerminalSet;
+    string startToken;
+
+    Closure closure(const LR_Item& item);
     bool isNonTerminal(const string& token);
-    vector<tuple<NonTerminal, string>> getMovingInOf(const string& nonTerminal);
-    SLR_CLOSURE calClosure(const string& nonTerminal, const string& production, const int& pos);
-    vector<SLR_CLOSURE> calNextClosuresOf(SLR_CLOSURE c);
+    vector<Rule> findRuleOf(const string& head);
+    static void closureAdd(const vector<Rule>& forAdds, Closure& c);
+
+    void printClosure(const Closure& c);
 public:
     explicit SimpleLRGrammar(Grammar grammar);
+    void emit();
 };
 
 #endif //AUTEX_SLR_H
