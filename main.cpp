@@ -14,7 +14,7 @@ int main()
     //lex.generate();
 
     Grammar g = Grammar("../test/source/SLR.gr");
-    g.printInformation();
+    //g.printInformation();
 
     //Parser parser = Parser(g);
     //parser.emit("i=(i+i)");

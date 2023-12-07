@@ -20,12 +20,20 @@ Closure SimpleLRGrammar::closure(const LR_Item &item) {
     Closure result;
     result.push_back(item);
     bool isUpdated = true;
-    for(const LR_Item& current : result) {
-        string dotTokenOfCurrentItem = string(1, current.rule.body[current.dotPosition]);
+    int current = 0;
+    while(isUpdated) {
+        isUpdated = false;
+        string dotTokenOfCurrentItem = string(1, result[current].rule.body[result[current].dotPosition]);
         if(isNonTerminal(dotTokenOfCurrentItem)) {
+            int size = result.size();
             closureAdd(findRuleOf(dotTokenOfCurrentItem), result);
+            if(size < result.size()) {
+                isUpdated = true;
+            }
         }
+        current++;
     }
+    return result;
 }
 
 bool SimpleLRGrammar::isNonTerminal(const string &token) {
@@ -60,12 +68,16 @@ void SimpleLRGrammar::printClosure(const Closure &c) {
         cout << item.rule.head << " -> ";
         for(int i = 0; i < item.rule.body.size(); i++) {
             if(i == item.dotPosition) {
-                cout << "•";
+                cout << "~";
             }
             cout << item.rule.body[i];
         }
         cout << endl;
     }
+}
+
+vector<Closure> SimpleLRGrammar::closuresOf(const Closure &cls) {
+    return vector<Closure>();
 }
 
 

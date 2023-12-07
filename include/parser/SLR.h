@@ -46,6 +46,7 @@ private:
     string startToken;
 
     Closure closure(const LR_Item& item);
+    vector<Closure> closuresOf(const Closure& cls);
     bool isNonTerminal(const string& token);
     vector<Rule> findRuleOf(const string& head);
     static void closureAdd(const vector<Rule>& forAdds, Closure& c);
