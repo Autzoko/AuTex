@@ -19,17 +19,16 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar) {
 Closure SimpleLRGrammar::closure(const LR_Item &item) {
     Closure result;
     result.push_back(item);
-    bool isUpdated = true;
+    unsigned long long size;
     int current = 0;
-    while(isUpdated) {
-        isUpdated = false;
+    while(true) {
         string dotTokenOfCurrentItem = string(1, result[current].rule.body[result[current].dotPosition]);
         if(isNonTerminal(dotTokenOfCurrentItem)) {
-            unsigned long long size = result.size();
             closureAdd(findRuleOf(dotTokenOfCurrentItem), result);
-            if(size < result.size()) {
-                isUpdated = true;
-            }
+        }
+        size = result.size();
+        if(current == size - 1) {
+            break;
         }
         current++;
     }
