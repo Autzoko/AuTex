@@ -18,14 +18,12 @@ struct Rule {
 struct LR_Item {
     Rule rule;
     int dotPosition;
-    set<string> lookahead;
 
     LR_Item(Rule r, int dPos) : rule(std::move(r)), dotPosition(dPos) {}
     bool operator==(const LR_Item& other) const {
         return  rule.head == other.rule.head &&
                 rule.body == other.rule.body &&
-                dotPosition == other.dotPosition &&
-                lookahead == other.lookahead;
+                dotPosition == other.dotPosition;
     }
 };
 
@@ -44,14 +42,19 @@ private:
     ItemSet itemSet;
     set<string> nonTerminalSet;
     string startToken;
+    map<pair<Closure, string>, Closure> transmission;
 
     Closure closure(const LR_Item& item);
     vector<Closure> closuresOf(const Closure& cls);
+    void fillItemSet();
+    void itemSetAdd(const vector<Closure>& cls);
     bool isNonTerminal(const string& token);
     vector<Rule> findRuleOf(const string& head);
     static void closureAdd(const vector<Rule>& forAdds, Closure& c);
+    static bool isAdded(const Closure& closure, const LR_Item& item);
 
-    void printClosure(const Closure& c);
+    static void printClosure(const Closure& c);
+    void printItemSet();
 public:
     explicit SimpleLRGrammar(Grammar grammar);
     void emit();
