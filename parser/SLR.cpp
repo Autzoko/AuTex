@@ -5,7 +5,7 @@
 
 #include "../include/parser/SLR.h"
 
-SimpleLRGrammar::SimpleLRGrammar(Grammar grammar) {
+SimpleLRGrammar::SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve) {
     grammarRules = grammar.getGrammarRules();
     for(const auto& item : grammarRules) {
         for(const auto& production : item.second) {
@@ -14,6 +14,7 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar) {
     }
     nonTerminalSet = grammar.getNonTerminals();
     startToken = grammar.getStartToken();
+    itemSet.reserve(itemSet_alloc_reserve);
 }
 
 Closure SimpleLRGrammar::closure(const LR_Item &item) {
@@ -100,21 +101,23 @@ void SimpleLRGrammar::printItemSet() {
 void SimpleLRGrammar::fillItemSet() {
     LR_Item firstOne = LR_Item(findRuleOf(startToken)[0], 0);
     itemSet.push_back(closure(firstOne));
-    unsigned long long itemSetSize;
+    unsigned long long itemSetSize = 0;
     int index = 0;
     while(true) {
         itemSetAdd(closuresOf(itemSet[index]));
         itemSetSize = itemSet.size();
-        index++;
-        if(index == itemSetSize - 1) {
+        if(index == itemSetSize) {
             break;
         }
+        index++;
     }
 }
 
 void SimpleLRGrammar::itemSetAdd(const vector<Closure>& cls) {
     for(const Closure& c : cls) {
-        itemSet.push_back(c);
+        if(!isClosureAdded(c)) {
+            itemSet.push_back(c);
+        }
     }
 }
 
@@ -122,6 +125,13 @@ bool SimpleLRGrammar::isAdded(const Closure &closure, const LR_Item &item) {
     return ranges::any_of(closure.begin(), closure.end(),
                    [item](const LR_Item& lrItem) {
         return lrItem == item;
+    });
+}
+
+bool SimpleLRGrammar::isClosureAdded(const Closure &closure) {
+    return std::ranges::any_of(itemSet.begin(), itemSet.end(),
+                               [closure](const Closure& cls) {
+        return cls==closure;
     });
 }
 

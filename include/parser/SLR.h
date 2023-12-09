@@ -52,11 +52,12 @@ private:
     vector<Rule> findRuleOf(const string& head);
     static void closureAdd(const vector<Rule>& forAdds, Closure& c);
     static bool isAdded(const Closure& closure, const LR_Item& item);
+    bool isClosureAdded(const Closure& closure);
 
     static void printClosure(const Closure& c);
     void printItemSet();
 public:
-    explicit SimpleLRGrammar(Grammar grammar);
+    explicit SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve=100);
     void emit();
 };
 
