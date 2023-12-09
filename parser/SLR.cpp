@@ -41,9 +41,8 @@ void SimpleLRGrammar::closureAdd(const vector<Rule> &forAdds, Closure& c) {
     }
 }
 
-void SimpleLRGrammar::emit() {
+void SimpleLRGrammar::generate() {
     fillItemSet();
-    printItemSet();
 }
 
 void SimpleLRGrammar::printClosure(const Closure &c) {
@@ -58,18 +57,6 @@ void SimpleLRGrammar::printClosure(const Closure &c) {
         cout << endl;
     }
 }
-
-//vector<Closure> SimpleLRGrammar::closuresOf(const Closure &cls) {
-//    vector<Closure> result;
-//    for(const auto& item : cls) {
-//        LR_Item tmp = item;
-//        if(item.dotPosition < item.rule.body.size()) {
-//            tmp.dotPosition++;
-//            result.push_back(closure(tmp));
-//        }
-//    }
-//    return result;
-//}
 
 void SimpleLRGrammar::printItemSet() {
     int index = 0;
@@ -169,6 +156,10 @@ vector<Closure> SimpleLRGrammar::emit(const Closure &cls) {
     for(const string& token : transmit_tokens) {
         Closure transmit_to = transmit(cls, token);
         result.push_back(transmit_to);
+        Transmission tmp = Transmission(cls, transmit_to, token);
+        if(!isInTransmission(tmp)) {
+            transmission.push_back(tmp);
+        }
     }
     return result;
 }
@@ -177,6 +168,39 @@ void SimpleLRGrammar::printAdvTokenSet(const set<string> &ATS) {
     for(const string& token : ATS) {
         cout << token << endl;
     }
+}
+
+bool SimpleLRGrammar::isReduceClosure(const Closure &cls) {
+    return ranges::all_of(cls.begin(), cls.end(),
+                   [](const LR_Item& item) {
+        return item.dotPosition == item.rule.body.size();
+    });
+}
+
+bool SimpleLRGrammar::isInTransmission(const Transmission &t) {
+    return ranges::any_of(transmission.begin(), transmission.end(),
+                          [t](const Transmission& trans) {
+        return t == trans;
+    });
+}
+
+void SimpleLRGrammar::printTransmission() {
+    cout << "Transmission Table:" << endl;
+    for(const auto& t : transmission) {
+        cout << "Closure" << fetchClosureIndex(t.source) << ":";
+        cout << " --\"" << t.token << "\"--> ";
+        cout << "Closure" << fetchClosureIndex(t.destination) << endl;
+    }
+}
+
+long long SimpleLRGrammar::fetchClosureIndex(const Closure& cls) {
+    auto iter = find(itemSet.begin(), itemSet.end(), cls);
+    return distance(itemSet.begin(), iter);
+}
+
+void SimpleLRGrammar::printInfo() {
+    printItemSet();
+    printTransmission();
 }
 
 

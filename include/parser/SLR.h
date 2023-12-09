@@ -30,6 +30,20 @@ struct LR_Item {
 using Closure = vector<LR_Item>;
 using ItemSet = vector<Closure>;
 
+struct Transmission {
+    Closure source;
+    Closure destination;
+    string token;
+    int src_index, dest_index;
+
+    Transmission(Closure  src, Closure  dest, string  t) : source(std::move(src)), destination(std::move(dest)), token(std::move(t)) {}
+    bool operator==(const Transmission& other) const {
+        return  source == other.source &&
+                destination == other.destination &&
+                token == other.token;
+    }
+};
+
 using ActionTable = map<pair<int, string>, string>;
 using GotoTable = map<pair<int, string>, int>;
 
@@ -42,10 +56,9 @@ private:
     ItemSet itemSet;
     set<string> nonTerminalSet;
     string startToken;
-    map<pair<Closure, string>, Closure> transmission;
+    vector<Transmission> transmission;
 
     Closure closure(const vector<LR_Item>& items);
-    //vector<Closure> closuresOf(const Closure& cls);
     void fillItemSet();
     void itemSetAdd(const vector<Closure>& cls);
     bool isNonTerminal(const string& token);
@@ -57,15 +70,20 @@ private:
     static set<string> findAdvanceTokensIn(const Closure& closure);
     Closure transmit(const Closure& cls, const string& token);
     vector<Closure> emit(const Closure& cls);
+    static bool isReduceClosure(const Closure& cls);
+    bool isInTransmission(const Transmission& t);
+    long long fetchClosureIndex(const Closure& cls);
 
     static void printClosure(const Closure& c);
     void printItemSet();
+    void printTransmission();
 
     //debug
     static void printAdvTokenSet(const set<string>& ATS);
 public:
     explicit SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve=100);
-    void emit();
+    void generate();
+    void printInfo();
 };
 
 #endif //AUTEX_SLR_H

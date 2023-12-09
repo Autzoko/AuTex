@@ -35,6 +35,7 @@ int main()
     //still has bugs when add "(" and ")"
 
     SimpleLRGrammar SLR = SimpleLRGrammar(g);
-    SLR.emit();
+    SLR.generate();
+    SLR.printInfo();
     return 0;
 }
