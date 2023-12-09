@@ -17,25 +17,6 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve) {
     itemSet.reserve(itemSet_alloc_reserve);
 }
 
-Closure SimpleLRGrammar::closure(const LR_Item &item) {
-    Closure result;
-    result.push_back(item);
-    unsigned long long size;
-    int current = 0;
-    while(true) {
-        string dotTokenOfCurrentItem = string(1, result[current].rule.body[result[current].dotPosition]);
-        if(isNonTerminal(dotTokenOfCurrentItem)) {
-            closureAdd(findRuleOf(dotTokenOfCurrentItem), result);
-        }
-        size = result.size();
-        if(current == size - 1) {
-            break;
-        }
-        current++;
-    }
-    return result;
-}
-
 bool SimpleLRGrammar::isNonTerminal(const string &token) {
     if(nonTerminalSet.count(token) != 0) return true;
     else return false;
@@ -78,33 +59,35 @@ void SimpleLRGrammar::printClosure(const Closure &c) {
     }
 }
 
-vector<Closure> SimpleLRGrammar::closuresOf(const Closure &cls) {
-    vector<Closure> result;
-    for(const auto& item : cls) {
-        LR_Item tmp = item;
-        if(item.dotPosition < item.rule.body.size()) {
-            tmp.dotPosition++;
-            result.push_back(closure(tmp));
-        }
-    }
-    return result;
-}
+//vector<Closure> SimpleLRGrammar::closuresOf(const Closure &cls) {
+//    vector<Closure> result;
+//    for(const auto& item : cls) {
+//        LR_Item tmp = item;
+//        if(item.dotPosition < item.rule.body.size()) {
+//            tmp.dotPosition++;
+//            result.push_back(closure(tmp));
+//        }
+//    }
+//    return result;
+//}
 
 void SimpleLRGrammar::printItemSet() {
+    int index = 0;
     for(const auto& item : itemSet) {
-        cout << "Closure:" << endl;
+        cout << "Closure " << index++ << ":" << endl;
         printClosure(item);
         cout << "--------" << endl;
     }
 }
 
 void SimpleLRGrammar::fillItemSet() {
-    LR_Item firstOne = LR_Item(findRuleOf(startToken)[0], 0);
+    vector<LR_Item> firstOne;
+    firstOne.emplace_back(findRuleOf(startToken)[0], 0);
     itemSet.push_back(closure(firstOne));
     unsigned long long itemSetSize = 0;
     int index = 0;
     while(true) {
-        itemSetAdd(closuresOf(itemSet[index]));
+        itemSetAdd(emit(itemSet[index]));
         itemSetSize = itemSet.size();
         if(index == itemSetSize) {
             break;
@@ -133,6 +116,67 @@ bool SimpleLRGrammar::isClosureAdded(const Closure &closure) {
                                [closure](const Closure& cls) {
         return cls==closure;
     });
+}
+
+Closure SimpleLRGrammar::closure(const vector<LR_Item> &items) {
+    Closure result = items;
+    unsigned long long size;
+    int current = 0;
+    while(true) {
+        string dotTokenOfCurrentItem = string(1, result[current].rule.body[result[current].dotPosition]);
+        if(isNonTerminal(dotTokenOfCurrentItem)) {
+            closureAdd(findRuleOf(dotTokenOfCurrentItem), result);
+        }
+        size = result.size();
+        if(current == size - 1) {
+            break;
+        }
+        current++;
+    }
+    return result;
+}
+
+vector<LR_Item> SimpleLRGrammar::advance(const Closure &closure, const string &token) {
+    vector<LR_Item> result;
+    for(const LR_Item& item : closure) {
+        string advToken = string(1, item.rule.body[item.dotPosition]);
+        if(advToken == token && item.dotPosition < item.rule.body.size()) {
+            result.emplace_back(item.rule, item.dotPosition + 1);
+        }
+    }
+    return result;
+}
+
+set<string> SimpleLRGrammar::findAdvanceTokensIn(const Closure &closure) {
+    set<string> result;
+    for(const auto& item : closure) {
+        string advToken = string(1, item.rule.body[item.dotPosition]);
+        if(!result.contains(advToken) && item.dotPosition != item.rule.body.size()) {
+            result.insert(advToken);
+        }
+    }
+    return result;
+}
+
+Closure SimpleLRGrammar::transmit(const Closure &cls, const string &token) {
+    return closure(advance(cls, token));
+}
+
+vector<Closure> SimpleLRGrammar::emit(const Closure &cls) {
+    set<string> transmit_tokens = findAdvanceTokensIn(cls);
+    vector<Closure> result;
+    result.reserve(transmit_tokens.size());
+    for(const string& token : transmit_tokens) {
+        Closure transmit_to = transmit(cls, token);
+        result.push_back(transmit_to);
+    }
+    return result;
+}
+
+void SimpleLRGrammar::printAdvTokenSet(const set<string> &ATS) {
+    for(const string& token : ATS) {
+        cout << token << endl;
+    }
 }
 
 

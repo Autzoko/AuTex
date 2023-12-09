@@ -44,8 +44,8 @@ private:
     string startToken;
     map<pair<Closure, string>, Closure> transmission;
 
-    Closure closure(const LR_Item& item);
-    vector<Closure> closuresOf(const Closure& cls);
+    Closure closure(const vector<LR_Item>& items);
+    //vector<Closure> closuresOf(const Closure& cls);
     void fillItemSet();
     void itemSetAdd(const vector<Closure>& cls);
     bool isNonTerminal(const string& token);
@@ -53,9 +53,16 @@ private:
     static void closureAdd(const vector<Rule>& forAdds, Closure& c);
     static bool isAdded(const Closure& closure, const LR_Item& item);
     bool isClosureAdded(const Closure& closure);
+    static vector<LR_Item> advance(const Closure& closure, const string& token);
+    static set<string> findAdvanceTokensIn(const Closure& closure);
+    Closure transmit(const Closure& cls, const string& token);
+    vector<Closure> emit(const Closure& cls);
 
     static void printClosure(const Closure& c);
     void printItemSet();
+
+    //debug
+    static void printAdvTokenSet(const set<string>& ATS);
 public:
     explicit SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve=100);
     void emit();
