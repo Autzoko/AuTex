@@ -71,7 +71,7 @@ void SimpleLRGrammar::fillItemSet() {
     vector<LR_Item> firstOne;
     firstOne.emplace_back(findRuleOf(startToken)[0], 0);
     itemSet.push_back(closure(firstOne));
-    unsigned long long itemSetSize = 0;
+    unsigned long long itemSetSize;
     int index = 0;
     while(true) {
         itemSetAdd(emit(itemSet[index]));

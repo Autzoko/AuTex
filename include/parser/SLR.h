@@ -34,7 +34,6 @@ struct Transmission {
     Closure source;
     Closure destination;
     string token;
-    int src_index, dest_index;
 
     Transmission(Closure  src, Closure  dest, string  t) : source(std::move(src)), destination(std::move(dest)), token(std::move(t)) {}
     bool operator==(const Transmission& other) const {
