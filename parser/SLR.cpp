@@ -76,7 +76,7 @@ void SimpleLRGrammar::printItemSet() {
     for(const auto& item : itemSet) {
         cout << "Closure " << index++ << ":" << endl;
         printClosure(item);
-        cout << "--------" << endl;
+        cout << "-------------" << endl;
     }
 }
 
