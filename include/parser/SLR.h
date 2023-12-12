@@ -6,6 +6,7 @@
 #define AUTEX_SLR_H
 
 #include <utility>
+#include <any>
 
 #include "Grammar.h"
 
@@ -13,6 +14,9 @@ struct Rule {
     string head;
     string body;
     Rule(string h, string b) : head(std::move(h)), body(std::move(b)) {}
+    bool operator==(const Rule& other) const {
+        return head == other.head && body == other.body;
+    }
 };
 
 struct LR_Item {
@@ -41,6 +45,10 @@ struct Transmission {
                 destination == other.destination &&
                 token == other.token;
     }
+};
+
+struct ActionItem {
+
 };
 
 using ActionTable = map<pair<int, string>, string>;
@@ -74,9 +82,11 @@ private:
     static bool isReduceClosure(const Closure& cls);
     bool isInTransmission(const Transmission& t);
     long long fetchClosureIndex(const Closure& cls);
+    static bool hasConflict(const Closure& cls);
+    string getActionOf(const string& terminal, const Closure& cls);
+    long long fetchProductionIndex(const Rule& rule);
+    static LR_Item findInClosure(const Closure& cls, const function<bool(const LR_Item&)>& condition);
 
-    FirstSet calFirst(const string& nonTerminal);
-    map<NonTerminal, FollowSet> calFollow();
 
     static void printClosure(const Closure& c);
     void printItemSet();

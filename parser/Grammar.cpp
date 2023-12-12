@@ -65,7 +65,6 @@ FirstSet Grammar::calFirst(const string &symbol) {
     const auto& rule = grammarRules[symbol];
     for(const string& production : rule) {
         for(char c : production) {
-            cout << c << endl;
             if(isNonTerminal(string(1, c))) {
                 if(string(1, c) == symbol) {
                     break;

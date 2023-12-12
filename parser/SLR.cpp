@@ -15,6 +15,11 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve) {
     nonTerminalSet = grammar.getNonTerminals();
     startToken = grammar.getStartToken();
     itemSet.reserve(itemSet_alloc_reserve);
+
+    for(const string& token : nonTerminalSet) {
+        firstSets.insert(make_pair(token, grammar.getFirstSetOf(token)));
+        followSets.insert(make_pair(token, grammar.getFollowSetOf(token)));
+    }
 }
 
 bool SimpleLRGrammar::isNonTerminal(const string &token) {
@@ -174,7 +179,7 @@ bool SimpleLRGrammar::isReduceClosure(const Closure &cls) {
     return ranges::all_of(cls.begin(), cls.end(),
                    [](const LR_Item& item) {
         return item.dotPosition == item.rule.body.size();
-    });
+    }) && cls.size() == 1;
 }
 
 bool SimpleLRGrammar::isInTransmission(const Transmission &t) {
@@ -203,41 +208,54 @@ void SimpleLRGrammar::printInfo() {
     printTransmission();
 }
 
-FirstSet SimpleLRGrammar::calFirst(const string& nonTerminal) {
-    set<string> result;
-    vector<Rule> rule = findRuleOf(nonTerminal);
-    for(const Rule& r : rule) {
-        for(const char& c : r.body) {
-            string current = string(1, c);
-            if(isNonTerminal(current)) {
-                const set<string>& first = calFirst(current);
-                result.insert(first.begin(), first.end());
-                if(first.find("") == first.end()) {
-                    break;
+bool SimpleLRGrammar::hasConflict(const Closure &cls) {
+    return ranges::any_of(cls.begin(), cls.end(),
+                          [](const LR_Item& item) {
+        return item.dotPosition == item.rule.body.size();
+    }) && ranges::any_of(cls.begin(), cls.end(),
+                         [](const LR_Item& item) {
+        return item.dotPosition != item.rule.body.size();
+    });
+}
+
+string SimpleLRGrammar::getActionOf(const string &terminal, const Closure &cls) {
+    if(!hasConflict(cls)) {
+        if(isReduceClosure(cls)) {
+            return "r" + to_string(fetchProductionIndex(cls.begin()->rule));
+        } else {
+            for(const Transmission& trans : transmission) {
+                if(cls == trans.source && terminal == trans.token) {
+                    return "s" + to_string(fetchClosureIndex(trans.destination));
                 }
-            } else if(current != " ") {
-                result.insert(current);
-                break;
+            }
+        }
+    } else {
+        Rule rule = findInClosure(cls, [](const LR_Item& item) {
+            return item.dotPosition == item.rule.body.size();
+        }).rule;
+        if(followSets[rule.head].contains(terminal)) {
+            return "r" + to_string(fetchProductionIndex(rule));
+        } else {
+            for(const Transmission& trans : transmission) {
+                if(cls == trans.source && terminal == trans.token) {
+                    return "s" + to_string(fetchClosureIndex(trans.destination));
+                }
             }
         }
     }
-    return result;
+    return "";
 }
 
-map<NonTerminal, FollowSet> SimpleLRGrammar::calFollow() {
-    if(firstSets.empty()) {
-        cerr << "Invalid first set, parser error." << endl;
-        throw std::runtime_error("Parser error");
-    }
-    map<NonTerminal, FollowSet> result;
-    bool isUpdated = true;
-    while(isUpdated) {
-        isUpdated = false;
-
-    }
-    return result;
+long long SimpleLRGrammar::fetchProductionIndex(const Rule &rule) {
+    return find(rules.begin(), rules.end(), rule) - rules.begin();
 }
 
-
+LR_Item SimpleLRGrammar::findInClosure(const Closure& cls, const function<bool(const LR_Item&)>& condition) {
+    for(const auto& item : cls) {
+        if(condition(item)) {
+            return item;
+        }
+    }
+}
 
 
