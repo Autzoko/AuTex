@@ -56,6 +56,8 @@ private:
     set<string> nonTerminalSet;
     string startToken;
     vector<Transmission> transmission;
+    map<NonTerminal, FirstSet> firstSets;
+    map<NonTerminal, FollowSet> followSets;
 
     Closure closure(const vector<LR_Item>& items);
     void fillItemSet();
@@ -72,6 +74,9 @@ private:
     static bool isReduceClosure(const Closure& cls);
     bool isInTransmission(const Transmission& t);
     long long fetchClosureIndex(const Closure& cls);
+
+    FirstSet calFirst(const string& nonTerminal);
+    map<NonTerminal, FollowSet> calFollow();
 
     static void printClosure(const Closure& c);
     void printItemSet();

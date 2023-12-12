@@ -65,7 +65,11 @@ FirstSet Grammar::calFirst(const string &symbol) {
     const auto& rule = grammarRules[symbol];
     for(const string& production : rule) {
         for(char c : production) {
+            cout << c << endl;
             if(isNonTerminal(string(1, c))) {
+                if(string(1, c) == symbol) {
+                    break;
+                }
                 const FirstSet& firstOfNonTerminal = calFirst(string(1, c));
                 firstSet.insert(firstOfNonTerminal.begin(), firstOfNonTerminal.end());
                 if(firstOfNonTerminal.find("") == firstOfNonTerminal.end()) {
@@ -312,7 +316,6 @@ void Grammar::printInformation() noexcept {
 
 void Grammar::emit() {
     for(auto& item : nonTerminalSet) {
-        cout << "eee" << endl;
         firstSets.insert(make_pair(item, calFirst(item)));
     }
     followSets = calFollow();

@@ -203,6 +203,41 @@ void SimpleLRGrammar::printInfo() {
     printTransmission();
 }
 
+FirstSet SimpleLRGrammar::calFirst(const string& nonTerminal) {
+    set<string> result;
+    vector<Rule> rule = findRuleOf(nonTerminal);
+    for(const Rule& r : rule) {
+        for(const char& c : r.body) {
+            string current = string(1, c);
+            if(isNonTerminal(current)) {
+                const set<string>& first = calFirst(current);
+                result.insert(first.begin(), first.end());
+                if(first.find("") == first.end()) {
+                    break;
+                }
+            } else if(current != " ") {
+                result.insert(current);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+map<NonTerminal, FollowSet> SimpleLRGrammar::calFollow() {
+    if(firstSets.empty()) {
+        cerr << "Invalid first set, parser error." << endl;
+        throw std::runtime_error("Parser error");
+    }
+    map<NonTerminal, FollowSet> result;
+    bool isUpdated = true;
+    while(isUpdated) {
+        isUpdated = false;
+
+    }
+    return result;
+}
+
 
 
 
