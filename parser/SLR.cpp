@@ -13,6 +13,8 @@ SimpleLRGrammar::SimpleLRGrammar(Grammar grammar, int itemSet_alloc_reserve) {
         }
     }
     nonTerminalSet = grammar.getNonTerminals();
+    getTerminals();
+    terminalSet.insert("#");
     startToken = grammar.getStartToken();
     itemSet.reserve(itemSet_alloc_reserve);
 
@@ -48,6 +50,7 @@ void SimpleLRGrammar::closureAdd(const vector<Rule> &forAdds, Closure& c) {
 
 void SimpleLRGrammar::generate() {
     fillItemSet();
+    doTable();
 }
 
 void SimpleLRGrammar::printClosure(const Closure &c) {
@@ -205,7 +208,13 @@ long long SimpleLRGrammar::fetchClosureIndex(const Closure& cls) {
 
 void SimpleLRGrammar::printInfo() {
     printItemSet();
+    cout << endl;
     printTransmission();
+    cout << endl;
+    printGotoTable();
+    cout << endl;
+    printActionTable();
+    cout << endl;
 }
 
 bool SimpleLRGrammar::hasConflict(const Closure &cls) {
@@ -255,6 +264,117 @@ LR_Item SimpleLRGrammar::findInClosure(const Closure& cls, const function<bool(c
         if(condition(item)) {
             return item;
         }
+    }
+    cerr << "Parser error: " << "no match item in closure" << endl;
+    throw std::runtime_error("Parser error");
+}
+
+long long SimpleLRGrammar::getGotoOf(const string &nonTerminal, const Closure &cls) {
+    for(const Transmission& trans : transmission) {
+        if(cls == trans.source && nonTerminal == trans.token) {
+            return fetchClosureIndex(trans.destination);
+        }
+    }
+    return -1;
+}
+
+void SimpleLRGrammar::doTable() {
+    for(const Closure& cls : itemSet) {
+        long long c_index = fetchClosureIndex(cls);
+        for(const string& token : nonTerminalSet) {
+            gotoTable.insert(make_pair(make_pair(c_index, token), getGotoOf(token, cls)));
+        }
+        for(const string& token : terminalSet) {
+            if(c_index == 1) {
+                actionTable.insert(make_pair(make_pair(c_index, "#"), "Acc"));
+                continue;
+            }
+            actionTable.insert(make_pair(make_pair(c_index, token), getActionOf(token, cls)));
+        }
+    }
+}
+
+void SimpleLRGrammar::printGotoTable() {
+    if(gotoTable.empty()) {
+        cerr << "Empty GOTO table!" << endl;
+        throw std::runtime_error("Parser error");
+    }
+    cout << "Goto Table:" << endl;
+    int line_width = 5;
+    for(int i = 0; i < nonTerminalSet.size() * (3 + line_width) - 4; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    cout << "|" << setw(line_width) << std::left << " " << "||";
+    for(const string& nt : nonTerminalSet) {
+        cout << setw(line_width) << std::left << nt << "|";
+    }
+    cout << endl;
+    for(int i = 0; i < nonTerminalSet.size() * (3 + line_width) - 4; i++) {
+        cout << "=";
+    }
+    cout << endl;
+
+    for(const auto& cls : itemSet) {
+        cout << "|" << setw(line_width) << std::left << fetchClosureIndex(cls) << "||";
+        for(const string& nt : nonTerminalSet) {
+            if(gotoTable[make_pair(fetchClosureIndex(cls), nt)] == -1) {
+                cout << setw(line_width) << std::left << " " << "|";
+            } else {
+                cout << setw(line_width) << std::left << gotoTable[make_pair(fetchClosureIndex(cls), nt)] << "|";
+            }
+        }
+        cout << endl;
+        for(int i = 0; i < nonTerminalSet.size() * (3 + line_width) - 4; i++) {
+            cout << "-";
+        }
+        cout << endl;
+    }
+}
+
+void SimpleLRGrammar::getTerminals() {
+    for(const auto& item : grammarRules) {
+        for(const auto& p : item.second) {
+            for(const char& c : p) {
+                if(!isNonTerminal(string(1, c))) {
+                    terminalSet.insert(string(1, c));
+                }
+            }
+        }
+    }
+}
+
+void SimpleLRGrammar::printActionTable() {
+    if(actionTable.empty()) {
+        cerr << "Empty Action table!" << endl;
+        throw std::runtime_error("Parser error");
+    }
+    cout << "Action Table" << endl;
+    int line_width = 5;
+    for(int i = 0; i < terminalSet.size() * (2 + line_width) - 1; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    cout << "|" << setw(line_width) << std::left << " " << "||";
+    for(const string& nt : terminalSet) {
+        cout << setw(line_width) << std::left << nt << "|";
+    }
+    cout << endl;
+    for(int i = 0; i < terminalSet.size() * (2 + line_width) - 1; i++) {
+        cout << "=";
+    }
+    cout << endl;
+
+    for(const auto& cls : itemSet) {
+        cout << "|" << setw(line_width) << std::left << fetchClosureIndex(cls) << "||";
+        for(const string& nt : terminalSet) {
+            cout << setw(line_width) << std::left << actionTable[make_pair(fetchClosureIndex(cls), nt)] << "|";
+        }
+        cout << endl;
+        for(int i = 0; i < terminalSet.size() * (2 + line_width) - 1; i++) {
+            cout << "-";
+        }
+        cout << endl;
     }
 }
 

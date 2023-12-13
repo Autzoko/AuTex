@@ -62,12 +62,16 @@ private:
     vector<Rule> rules;
     ItemSet itemSet;
     set<string> nonTerminalSet;
+    set<string> terminalSet;
     string startToken;
     vector<Transmission> transmission;
     map<NonTerminal, FirstSet> firstSets;
     map<NonTerminal, FollowSet> followSets;
+    ActionTable actionTable;
+    GotoTable gotoTable;
 
     Closure closure(const vector<LR_Item>& items);
+    void getTerminals();
     void fillItemSet();
     void itemSetAdd(const vector<Closure>& cls);
     bool isNonTerminal(const string& token);
@@ -84,13 +88,16 @@ private:
     long long fetchClosureIndex(const Closure& cls);
     static bool hasConflict(const Closure& cls);
     string getActionOf(const string& terminal, const Closure& cls);
+    long long getGotoOf(const string& nonTerminal, const Closure& cls);
     long long fetchProductionIndex(const Rule& rule);
     static LR_Item findInClosure(const Closure& cls, const function<bool(const LR_Item&)>& condition);
-
+    void doTable();
 
     static void printClosure(const Closure& c);
     void printItemSet();
     void printTransmission();
+    void printGotoTable();
+    void printActionTable();
 
     //debug
     static void printAdvTokenSet(const set<string>& ATS);
